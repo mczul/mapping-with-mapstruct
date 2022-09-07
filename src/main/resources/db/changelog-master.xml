@@ -4,8 +4,8 @@
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.4.xsd">
 
-    <changeSet id="setup" author="c.zuleger@cronos.de">
-        <createTable tableName="customer">
+    <changeSet id="2022-09-05_setup-db-objects" author="c.zuleger@cronos.de">
+        <createTable tableName="customers">
             <column name="id" type="uuid" defaultValue="random_uuid()">
                 <constraints nullable="false"/>
             </column>
@@ -27,31 +27,47 @@
             </column>
         </createTable>
 
-        <addPrimaryKey tableName="customer" columnNames="id"/>
-        <addUniqueConstraint constraintName="un_customer_email" tableName="customer"
+        <addPrimaryKey constraintName="pk_customers"
+                       tableName="customers"
+                       columnNames="id"/>
+        <addUniqueConstraint constraintName="un_customers_email"
+                             tableName="customers"
                              columnNames="email"/>
 
-        <insert tableName="customer">
-            <column name="id">9a42fcb7-e49c-401e-b7c6-e5c9960c95fb</column>
-            <column name="email">c.zuleger@cronos.de</column>
-            <column name="first_name">Christoph</column>
-            <column name="last_name">Zuleger</column>
-            <column name="birthday">1979-07-31</column>
-            <column name="created">2022-08-15T12:34:56Z</column>
-            <column name="last_modified">2022-08-15T12:34:56Z</column>
-        </insert>
 
-        <createTable tableName="customer_order">
+        <createTable tableName="products">
+            <column name="id" type="uuid" defaultValue="random_uuid()">
+                <constraints nullable="false"/>
+            </column>
+            <column name="name" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_modified" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addPrimaryKey constraintName="pk_products"
+                       tableName="products"
+                       columnNames="id"/>
+        <addUniqueConstraint constraintName="un_products_name"
+                             tableName="products"
+                             columnNames="name"/>
+
+        <createTable tableName="customer_orders">
             <column name="id" type="uuid" defaultValue="random_uuid()">
                 <constraints nullable="false"/>
             </column>
             <column name="customer_id" type="uuid">
                 <constraints nullable="false"/>
             </column>
-            <column name="article_name" type="varchar(255)">
+            <column name="product_id" type="uuid">
                 <constraints nullable="false"/>
             </column>
-            <column name="article_quantity" type="integer">
+            <column name="quantity" type="integer">
                 <constraints nullable="false"/>
             </column>
             <column name="state" type="varchar(80)">
@@ -65,49 +81,82 @@
             </column>
         </createTable>
 
-        <addPrimaryKey tableName="customer_order" columnNames="id"/>
-        <addForeignKeyConstraint constraintName="fk_order_customer"
-                                 baseTableName="customer_order"
+        <addPrimaryKey constraintName="pk_customer_orders"
+                       tableName="customer_orders"
+                       columnNames="id"/>
+        <addForeignKeyConstraint constraintName="fk_customer_order_customer"
+                                 baseTableName="customer_orders"
                                  baseColumnNames="customer_id"
-                                 referencedTableName="customer"
+                                 referencedTableName="customers"
+                                 referencedColumnNames="id"/>
+        <addForeignKeyConstraint constraintName="fk_customer_order_product"
+                                 baseTableName="customer_orders"
+                                 baseColumnNames="product_id"
+                                 referencedTableName="products"
                                  referencedColumnNames="id"/>
 
-        <insert tableName="customer_order">
+    </changeSet>
+
+    <changeSet id="2022-09-05_initial-db-data" author="c.zuleger@cronos.de">
+        <insert tableName="customers">
+            <column name="id">9a42fcb7-e49c-401e-b7c6-e5c9960c95fb</column>
+            <column name="email">c.zuleger@cronos.de</column>
+            <column name="first_name">Christoph</column>
+            <column name="last_name">Zuleger</column>
+            <column name="birthday">1979-07-31</column>
+            <column name="created">2022-08-15T12:34:56Z</column>
+            <column name="last_modified">2022-08-15T12:34:56Z</column>
+        </insert>
+
+        <insert tableName="products">
+            <column name="id">852c6c14-2cd9-44c1-a20a-84d7dcdfc506</column>
+            <column name="name">Tomato</column>
+            <column name="created">2020-01-01T08:00:00Z</column>
+            <column name="last_modified">2021-06-15T15:00:00Z</column>
+        </insert>
+
+        <insert tableName="products">
+            <column name="id">98217ee2-543c-463e-8f36-b753a62d144f</column>
+            <column name="name">Olive</column>
+            <column name="created">2020-02-01T09:00:00Z</column>
+            <column name="last_modified">2021-10-31T18:25:00Z</column>
+        </insert>
+
+        <insert tableName="customer_orders">
             <column name="customer_id">9a42fcb7-e49c-401e-b7c6-e5c9960c95fb</column>
             <column name="state">NEW</column>
-            <column name="article_name">Tomato</column>
-            <column name="article_quantity">12</column>
+            <column name="product_id">852c6c14-2cd9-44c1-a20a-84d7dcdfc506</column>
+            <column name="quantity">12</column>
             <column name="created">2022-01-02T12:34:56Z</column>
             <column name="last_modified">2022-01-02T12:34:56Z</column>
         </insert>
 
-        <insert tableName="customer_order">
+        <insert tableName="customer_orders">
             <column name="customer_id">9a42fcb7-e49c-401e-b7c6-e5c9960c95fb</column>
             <column name="state">ACCEPTED</column>
-            <column name="article_name">Tomato</column>
-            <column name="article_quantity">23</column>
+            <column name="product_id">98217ee2-543c-463e-8f36-b753a62d144f</column>
+            <column name="quantity">23</column>
             <column name="created">2022-02-03T12:34:56Z</column>
             <column name="last_modified">2022-04-05T12:34:56Z</column>
         </insert>
 
-        <insert tableName="customer_order">
+        <insert tableName="customer_orders">
             <column name="customer_id">9a42fcb7-e49c-401e-b7c6-e5c9960c95fb</column>
             <column name="state">IN_PROGRESS</column>
-            <column name="article_name">Olive</column>
-            <column name="article_quantity">4711</column>
+            <column name="product_id">852c6c14-2cd9-44c1-a20a-84d7dcdfc506</column>
+            <column name="quantity">4711</column>
             <column name="created">2022-06-07T12:34:56Z</column>
             <column name="last_modified">2022-08-09T12:34:56Z</column>
         </insert>
 
-        <insert tableName="customer_order">
+        <insert tableName="customer_orders">
             <column name="customer_id">9a42fcb7-e49c-401e-b7c6-e5c9960c95fb</column>
             <column name="state">SUCCESS</column>
-            <column name="article_name">Mozarella</column>
-            <column name="article_quantity">10</column>
+            <column name="product_id">98217ee2-543c-463e-8f36-b753a62d144f</column>
+            <column name="quantity">10</column>
             <column name="created">2022-10-11T12:34:56Z</column>
             <column name="last_modified">2022-12-13T12:34:56Z</column>
         </insert>
-
     </changeSet>
 
 </databaseChangeLog>
