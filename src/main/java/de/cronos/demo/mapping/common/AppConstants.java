@@ -6,4 +6,7 @@ public interface AppConstants {
 
     ZoneId DEFAULT_ZONE = ZoneId.of("Europe/Berlin");
 
+    String ROLE_NAME_ADMIN = "ADMIN";
+    String ROLE_NAME_USER = "USER";
+
 }

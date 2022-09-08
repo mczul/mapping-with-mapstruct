@@ -78,7 +78,10 @@ public class ShopController {
     @Transactional
     public ResponseEntity<CustomerDetails> createCustomer(@RequestBody @Valid CreateCustomerEvent event) {
         // Option 1: Use Matryoshka style mapping with MapStruct
-        //           (might not fit for updates & queries... lack of error handling integration options)
+        //           pros: delegation of consistency checks to declarative framework (at compile time!); error handling
+        //                 will most certainly be easier (compared to fluent Streams usage due to missing error channel)
+        //           cons: imperative approach with local state hiding implementation details (can be seen as an
+        //                 advantage either);
         return ResponseEntity.ok(
                 customerMapper.toDetails(
                         customerRepository.save(
@@ -91,16 +94,24 @@ public class ShopController {
     @PutMapping("/customers")
     @Transactional
     public ResponseEntity<CustomerDetails> updateCustomer(@RequestBody @Valid UpdateCustomerEvent update) {
-        // Option 2: Manually use functional style method chaining in combindation with lombok's "with" feature
+        // Option 2: Manually use functional style method chaining in combindation with lombok's "@With" feature
+        //           (looks clean... but consistency might be a problem due to manual sync between event and entity)
         return customerRepository.findById(update.getCustomerId())
-                .map(customer -> customer.withEmail(update.getEmail().orElse(customer.getEmail())))
-                .map(customer -> customer.withFirstName(update.getFirstName().orElse(customer.getFirstName())))
+                // Option 2a: Use stateless approach based on event
+                //            pros: no obsolete entity instance creation
+                //            cons: mapping single attribute to entity looks wierd and "orElse(entity)" suffix is fishy
+                //                  folklore... reducing the readability even more
+                .map(customer -> update.getEmail().map(customer::withEmail).orElse(customer))
+                .map(customer -> update.getFirstName().map(customer::withFirstName).orElse(customer))
+                // Option 2b: Use stateless approach based on entity
+                //            pros: descriptive and readable
+                //            cons: unnecessary entity creation if event doesn't contain attribute changes
                 .map(customer -> customer.withLastName(update.getLastName().orElse(customer.getLastName())))
                 .map(customer -> customer.withBirthday(update.getBirthday().orElse(customer.getBirthday())))
                 .map(customerRepository::save)
                 .map(customerMapper::toDetails)
                 .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+                .orElse(ResponseEntity.badRequest().build());
     }
 
     @GetMapping("/customers/{customerId}")
