@@ -36,7 +36,7 @@ class CustomerRepositoryIT {
             // given
             final var expectations = orderRepository.findAll().stream()
                     .collect(Collectors.groupingBy(OrderEntity::getCustomer));
-            // Checking testing conditions is still part of the "given" block
+            // Checking conditions is still part of the "given" block
             assertThat(expectations).hasSizeGreaterThan(1);
 
             // when

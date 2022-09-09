@@ -9,7 +9,6 @@ import de.cronos.demo.mapping.customers.model.events.UpdateCustomerEvent;
 import de.cronos.demo.mapping.customers.model.read.CustomerDetails;
 import de.cronos.demo.mapping.customers.model.read.CustomerInfo;
 import de.cronos.demo.mapping.orders.OrderRepository;
-import de.cronos.demo.mapping.orders.model.OrderEntity;
 import de.cronos.demo.mapping.orders.model.OrderMapper;
 import de.cronos.demo.mapping.orders.model.OrderState;
 import de.cronos.demo.mapping.orders.model.events.PlaceOrderEvent;
@@ -29,6 +28,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import java.time.LocalDateTime;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 import static de.cronos.demo.mapping.api.model.StatisticsMapper.*;
@@ -157,6 +157,10 @@ public class ShopController {
     @PostMapping("/orders")
     @Transactional
     public ResponseEntity<OrderDetails> placeOrder(@RequestBody @Valid PlaceOrderEvent event) {
+        // Following code is OK and does not hide implementation details... nice and transparent.
+        // On the other hand: What if we add new attributes to our OrderEntity? We need to traverse all line where new
+        // instances are created and update every single usage.
+        /*
         return customerRepository.findById(event.getCustomerId())
                 .map(customer -> OrderEntity.builder()
                         .customer(customer)
@@ -164,6 +168,16 @@ public class ShopController {
                         .product(productRepository.findById(event.getProductId()).orElseThrow())
                         .quantity(event.getQuantity())
                         .build())
+                .map(orderRepository::save)
+                .map(orderMapper::toDetails)
+                .map(ResponseEntity::ok)
+                .orElseThrow();
+         */
+
+        // This version uses MapStruct... the OrderMapper provides overloaded "from" functions that have
+        // descriptive mappings and prevent compilation (see annotation process configuration in "pom.xml"...
+        // "mapstruct.unmappedTargetPolicy=ERROR")
+        return Optional.ofNullable(orderMapper.from(event))
                 .map(orderRepository::save)
                 .map(orderMapper::toDetails)
                 .map(ResponseEntity::ok)

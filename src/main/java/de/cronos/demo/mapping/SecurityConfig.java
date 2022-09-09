@@ -42,7 +42,12 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.authorizeHttpRequests(authorize -> authorize
                         .regexMatchers(HttpMethod.GET, "/b2c/statistics/?.*").permitAll()
-                        .regexMatchers(HttpMethod.GET, "/b2c/customers/?.*").hasRole(AppConstants.ROLE_NAME_ADMIN)
+                        .regexMatchers("/b2c/customers/?.*").hasRole(AppConstants.ROLE_NAME_ADMIN)
+                        .regexMatchers(HttpMethod.GET, "/b2c/products/?.*").permitAll()
+                        .regexMatchers(HttpMethod.POST, "/b2c/products/?.*").hasRole(AppConstants.ROLE_NAME_ADMIN)
+                        .regexMatchers(HttpMethod.PUT, "/b2c/products/?.*").hasRole(AppConstants.ROLE_NAME_ADMIN)
+                        .regexMatchers(HttpMethod.DELETE, "/b2c/products/?.*").hasRole(AppConstants.ROLE_NAME_ADMIN)
+                        .regexMatchers("/b2c/orders/?.*").hasRole(AppConstants.ROLE_NAME_ADMIN)
                         .anyRequest().authenticated()
                 )
                 .httpBasic(basicConfigurer -> basicConfigurer.realmName("Demo: Mapping with MapStruct"));
