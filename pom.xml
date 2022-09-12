@@ -18,6 +18,7 @@
     <properties>
         <java.version>17</java.version>
         <mapstruct.version>1.5.2.Final</mapstruct.version>
+        <vavr.version>0.10.4</vavr.version>
     </properties>
 
     <dependencies>
@@ -51,6 +52,11 @@
         <dependency>
             <groupId>org.liquibase</groupId>
             <artifactId>liquibase-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.vavr</groupId>
+            <artifactId>vavr</artifactId>
+            <version>${vavr.version}</version>
         </dependency>
         <dependency>
             <groupId>com.h2database</groupId>

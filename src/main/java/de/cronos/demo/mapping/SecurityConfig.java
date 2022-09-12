@@ -47,9 +47,11 @@ public class SecurityConfig {
                         .regexMatchers(HttpMethod.POST, "/b2c/products/?.*").hasRole(AppConstants.ROLE_NAME_ADMIN)
                         .regexMatchers(HttpMethod.PUT, "/b2c/products/?.*").hasRole(AppConstants.ROLE_NAME_ADMIN)
                         .regexMatchers(HttpMethod.DELETE, "/b2c/products/?.*").hasRole(AppConstants.ROLE_NAME_ADMIN)
-                        .regexMatchers("/b2c/orders/?.*").hasRole(AppConstants.ROLE_NAME_ADMIN)
+                        .regexMatchers(HttpMethod.GET, "/b2c/orders/?.*").hasAnyRole(AppConstants.ROLE_NAME_USER, AppConstants.ROLE_NAME_ADMIN)
+                        .regexMatchers(HttpMethod.POST, "/b2c/orders/?.*").hasRole(AppConstants.ROLE_NAME_USER)
                         .anyRequest().authenticated()
                 )
+                .csrf().and()
                 .httpBasic(basicConfigurer -> basicConfigurer.realmName("Demo: Mapping with MapStruct"));
         return http.build();
     }

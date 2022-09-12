@@ -18,7 +18,9 @@ import de.cronos.demo.mapping.products.ProductRepository;
 import de.cronos.demo.mapping.products.model.ProductMapper;
 import de.cronos.demo.mapping.products.model.read.ProductDetails;
 import de.cronos.demo.mapping.products.model.read.ProductInfo;
+import io.vavr.control.Try;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -28,11 +30,11 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import java.time.LocalDateTime;
 import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 
 import static de.cronos.demo.mapping.api.model.StatisticsMapper.*;
 
+@Slf4j
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/b2c")
@@ -158,7 +160,7 @@ public class ShopController {
     @Transactional
     public ResponseEntity<OrderDetails> placeOrder(@RequestBody @Valid PlaceOrderEvent event) {
         // Following code is OK and does not hide implementation details... nice and transparent.
-        // On the other hand: What if we add new attributes to our OrderEntity? We need to traverse all line where new
+        // On the other hand: What if we add new attributes to our OrderEntity? We need to traverse all places where new
         // instances are created and update every single usage.
         /*
         return customerRepository.findById(event.getCustomerId())
@@ -171,17 +173,28 @@ public class ShopController {
                 .map(orderRepository::save)
                 .map(orderMapper::toDetails)
                 .map(ResponseEntity::ok)
-                .orElseThrow();
+                .orElse(ResponseEntity.badRequest().build());
          */
 
         // This version uses MapStruct... the OrderMapper provides overloaded "from" functions that have
-        // descriptive mappings and prevent compilation (see annotation process configuration in "pom.xml"...
+        // descriptive mappings and prevent inconsistencies (see annotation process configuration in "pom.xml"...
         // "mapstruct.unmappedTargetPolicy=ERROR")
-        return Optional.ofNullable(orderMapper.from(event))
+//        return Optional.ofNullable(orderMapper.from(event))
+//                .map(orderRepository::save)
+//                .map(orderMapper::toDetails)
+//                .map(ResponseEntity::ok)
+//                .orElse(ResponseEntity.badRequest().build());
+
+        // This version looks like the solution above but uses a nice lib called "vavr" to solve an important downside
+        // of the Java Stream API: By default there is no "error channel" concept other frameworks provide (e.g. RxJS).
+        return Try.of(() -> orderMapper.from(event))
+                .onFailure(throwable -> log.warn("Failed to create order entity!", throwable))
                 .map(orderRepository::save)
+                .onFailure(throwable -> log.warn("Failed to save order!", throwable))
                 .map(orderMapper::toDetails)
+                .onFailure(throwable -> log.warn("Failed to build order details!", throwable))
                 .map(ResponseEntity::ok)
-                .orElseThrow();
+                .getOrElseGet(throwable -> ResponseEntity.internalServerError().build());
     }
 
     @DeleteMapping("/orders/{orderId}")

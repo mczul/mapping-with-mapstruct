@@ -6,7 +6,9 @@ import de.cronos.demo.mapping.common.AppConstants;
 import de.cronos.demo.mapping.customers.CustomerRepository;
 import de.cronos.demo.mapping.customers.model.CustomerMapper;
 import de.cronos.demo.mapping.orders.OrderRepository;
+import de.cronos.demo.mapping.orders.model.OrderEntity;
 import de.cronos.demo.mapping.orders.model.OrderMapper;
+import de.cronos.demo.mapping.orders.model.events.PlaceOrderEvent;
 import de.cronos.demo.mapping.products.ProductRepository;
 import de.cronos.demo.mapping.products.model.ProductMapper;
 import org.junit.jupiter.api.DisplayName;
@@ -23,6 +25,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -34,12 +37,16 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
+import static de.cronos.demo.mapping.orders.model.OrderMapperTest.randomDetails;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 /**
@@ -194,6 +201,215 @@ class ShopControllerIT {
                     .hasValue(new Sort.Order(Direction.fromString(secondSortingDirection), secondSortingAttribute));
         }
 
+    }
+
+    @Nested
+    @DisplayName(Orders.BASE_PATH)
+    class Orders {
+        protected static final String BASE_PATH = "/b2c/orders";
+
+        @Nested
+        class PlaceOrder {
+
+            @Test
+            @WithAnonymousUser
+            void with_csrf_token_as_anonymous_user() throws Exception {
+                // given
+
+                // when
+                mvc.perform(
+                                post(BASE_PATH)
+                                        .with(csrf())
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content("""
+                                                            {
+                                                                "customerId": "%s",
+                                                                "productId":  "%s",
+                                                                "quantity":    %d
+                                                            }
+                                                        """.formatted(
+                                                        UUID.randomUUID(),
+                                                        UUID.randomUUID(),
+                                                        1
+                                                )
+                                        )
+                        )
+
+                        // then
+                        .andExpect(status().isUnauthorized());
+            }
+
+            @Test
+            @WithMockUser(roles = {AppConstants.ROLE_NAME_ADMIN})
+            void with_csrf_token_as_unauthorized_user() throws Exception {
+                // given
+
+                // when
+                mvc.perform(
+                                post(BASE_PATH)
+                                        .with(csrf())
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content("""
+                                                            {
+                                                                "customerId": "%s",
+                                                                "productId":  "%s",
+                                                                "quantity":    %d
+                                                            }
+                                                        """.formatted(
+                                                        UUID.randomUUID(),
+                                                        UUID.randomUUID(),
+                                                        1
+                                                )
+                                        )
+                        )
+
+                        // then
+                        .andExpect(status().isForbidden());
+            }
+
+            @Test
+            @WithMockUser(roles = {AppConstants.ROLE_NAME_USER})
+            void without_csrf_token_as_authorized_user() throws Exception {
+                // given
+
+                // when
+                mvc.perform(
+                                post(BASE_PATH)
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content("""
+                                                            {
+                                                                "customerId": "%s",
+                                                                "productId":  "%s",
+                                                                "quantity":    %d
+                                                            }
+                                                        """.formatted(
+                                                        UUID.randomUUID(),
+                                                        UUID.randomUUID(),
+                                                        1
+                                                )
+                                        )
+                        )
+
+                        // then
+                        .andExpect(status().isForbidden());
+            }
+
+            @ParameterizedTest
+            @CsvSource({
+                    // Invalid customer UUID
+                    "12345678-90ab-cdef-1234-567890ab0101x, 12345678-90ab-cdef-1234-567890ab0102, 1",
+                    // Invalid product UUID
+                    "12345678-90ab-cdef-1234-567890ab0101, 12345678-90ab-cdef-1234-567890ab0102x, 1",
+                    // Invalid quantity
+                    "12345678-90ab-cdef-1234-567890ab0101, 12345678-90ab-cdef-1234-567890ab0102, 0",
+
+            })
+            @WithMockUser(roles = {AppConstants.ROLE_NAME_USER})
+            void with_csrf_token_as_authorized_user_and_with_invalid_payload(String customerId, String productId, Integer quantity) throws Exception {
+                // given
+
+                // when
+                mvc.perform(
+                                post(BASE_PATH)
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .with(csrf())
+                                        .content("""
+                                                            {
+                                                                "customerId": "%s",
+                                                                "productId":  "%s",
+                                                                "quantity":    %d
+                                                            }
+                                                        """.formatted(
+                                                        customerId,
+                                                        productId,
+                                                        quantity
+                                                )
+                                        )
+                        )
+
+                        // then
+                        .andExpect(status().isBadRequest());
+
+                verify(orderRepository, never()).save(any(OrderEntity.class));
+            }
+
+            @Test
+            @WithMockUser(roles = {AppConstants.ROLE_NAME_USER})
+            void with_csrf_token_as_authorized_user_when_persistence_throws_exception() throws Exception {
+                // given
+                final var orderEntity = mock(OrderEntity.class);
+                given(orderMapper.from(any(PlaceOrderEvent.class))).willReturn(orderEntity);
+                given(orderRepository.save(orderEntity)).willThrow(new DataIntegrityViolationException("Unique constraint violated."));
+
+                // when
+                mvc.perform(
+                                post(BASE_PATH)
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .with(csrf())
+                                        .content("""
+                                                            {
+                                                                "customerId": "%s",
+                                                                "productId":  "%s",
+                                                                "quantity":    %d
+                                                            }
+                                                        """.formatted(
+                                                        UUID.randomUUID(),
+                                                        UUID.randomUUID(),
+                                                        1
+                                                )
+                                        )
+                        )
+
+                        // then
+                        .andExpect(status().isInternalServerError());
+            }
+
+            @Test
+            @WithMockUser(roles = {AppConstants.ROLE_NAME_USER})
+            void with_csrf_token_as_authorized_user_and_with_valid_payload() throws Exception {
+                // given
+                //  -> we do not need to care about entities... the return value of the final
+                //     outcome is the only relevant thing.
+                final var expectedDetails = randomDetails();
+                final var orderEntity = mock(OrderEntity.class);
+                given(orderMapper.from(any(PlaceOrderEvent.class))).willReturn(orderEntity);
+                given(orderRepository.save(orderEntity)).willReturn(orderEntity);
+                given(orderMapper.toDetails(orderEntity)).willReturn(expectedDetails);
+
+                // when
+                mvc.perform(
+                                post(BASE_PATH)
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .with(csrf())
+                                        .content("""
+                                                            {
+                                                                "customerId": "%s",
+                                                                "productId":  "%s",
+                                                                "quantity":    %d
+                                                            }
+                                                        """.formatted(
+                                                        expectedDetails.getCustomer().getId(),
+                                                        expectedDetails.getProduct().getId(),
+                                                        expectedDetails.getQuantity()
+                                                )
+                                        )
+                        )
+
+                        // then
+                        .andExpect(status().isOk())
+                        .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                        .andExpect(jsonPath("$.id").value(expectedDetails.getId().toString()))
+                        .andExpect(jsonPath("$.customer.id").value(expectedDetails.getCustomer().getId().toString()))
+                        .andExpect(jsonPath("$.product.id").value(expectedDetails.getProduct().getId().toString()))
+                        .andExpect(jsonPath("$.quantity").value(expectedDetails.getQuantity()))
+                        .andExpect(jsonPath("$.estimatedShipment").isNotEmpty());
+
+
+                verify(orderRepository, times(1)).save(any(OrderEntity.class));
+            }
+
+
+        }
     }
 
 }
