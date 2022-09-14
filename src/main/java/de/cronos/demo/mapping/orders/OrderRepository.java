@@ -36,12 +36,12 @@ public interface OrderRepository extends JpaRepository<OrderEntity, UUID>, JpaSp
 
             // Order state
             orderQuery.getOrderState().ifPresent(state -> predicates.push(
-                    criteriaBuilder.equal(root.get(OrderEntity_.STATE), state))
+                    criteriaBuilder.equal(root.get(OrderEntity_.state), state))
             );
 
             // Customer email
             orderQuery.getCustomerMail().ifPresent(mail -> predicates.push(
-                    criteriaBuilder.like(root.get(OrderEntity_.CUSTOMER).get(CustomerEntity_.EMAIL), "%" + mail + "%"))
+                    criteriaBuilder.like(root.get(OrderEntity_.customer).get(CustomerEntity_.email), "%" + mail + "%"))
             );
 
             return predicates.stream().reduce(
