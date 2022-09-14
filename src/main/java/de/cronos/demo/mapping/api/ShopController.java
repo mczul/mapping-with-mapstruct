@@ -14,6 +14,7 @@ import de.cronos.demo.mapping.orders.model.OrderState;
 import de.cronos.demo.mapping.orders.model.events.PlaceOrderEvent;
 import de.cronos.demo.mapping.orders.model.read.OrderDetails;
 import de.cronos.demo.mapping.orders.model.read.OrderInfo;
+import de.cronos.demo.mapping.orders.model.read.OrderQuery;
 import de.cronos.demo.mapping.products.ProductRepository;
 import de.cronos.demo.mapping.products.model.ProductMapper;
 import de.cronos.demo.mapping.products.model.read.ProductDetails;
@@ -25,6 +26,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -36,6 +38,7 @@ import static de.cronos.demo.mapping.api.model.StatisticsMapper.*;
 
 @Slf4j
 @RequiredArgsConstructor
+@Validated
 @RestController
 @RequestMapping("/b2c")
 public class ShopController {
@@ -153,6 +156,13 @@ public class ShopController {
     @GetMapping("/orders")
     public Page<OrderInfo> getAllOrders(Pageable pageable) {
         return orderRepository.findAll(pageable)
+                .map(orderMapper::toInfo);
+    }
+
+    @PostMapping("/orderQuery")
+    public Page<OrderInfo> executeOrderQuery(Pageable pageable, @RequestBody @Valid OrderQuery orderQuery) {
+        final var spec = orderRepository.buildSpec(orderQuery);
+        return orderRepository.findAll(spec, pageable)
                 .map(orderMapper::toInfo);
     }
 
