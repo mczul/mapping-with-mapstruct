@@ -226,16 +226,12 @@ class ShopControllerIT {
                                         .with(csrf())
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .content("""
-                                                            {
-                                                                "customerId": "%s",
-                                                                "productId":  "%s",
-                                                                "quantity":    %d
-                                                            }
-                                                        """.formatted(
-                                                        UUID.randomUUID(),
-                                                        UUID.randomUUID(),
-                                                        1
-                                                )
+                                                {
+                                                    "customerId": "%s",
+                                                    "productId":  "%s",
+                                                    "quantity":    %d
+                                                }
+                                                """.formatted(UUID.randomUUID(), UUID.randomUUID(), 1)
                                         )
                         )
 
@@ -254,16 +250,12 @@ class ShopControllerIT {
                                         .with(csrf())
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .content("""
-                                                            {
-                                                                "customerId": "%s",
-                                                                "productId":  "%s",
-                                                                "quantity":    %d
-                                                            }
-                                                        """.formatted(
-                                                        UUID.randomUUID(),
-                                                        UUID.randomUUID(),
-                                                        1
-                                                )
+                                                {
+                                                    "customerId": "%s",
+                                                    "productId":  "%s",
+                                                    "quantity":    %d
+                                                }
+                                                """.formatted(UUID.randomUUID(), UUID.randomUUID(), 1)
                                         )
                         )
 
@@ -281,16 +273,13 @@ class ShopControllerIT {
                                 post(BASE_PATH)
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .content("""
-                                                            {
-                                                                "customerId": "%s",
-                                                                "productId":  "%s",
-                                                                "quantity":    %d
-                                                            }
-                                                        """.formatted(
-                                                        UUID.randomUUID(),
-                                                        UUID.randomUUID(),
-                                                        1
-                                                )
+                                                {
+                                                    "customerId": "%s",
+                                                    "productId":  "%s",
+                                                    "quantity":    %d
+                                                }
+                                                """.formatted(
+                                                UUID.randomUUID(), UUID.randomUUID(), 1)
                                         )
                         )
 
@@ -318,16 +307,12 @@ class ShopControllerIT {
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .with(csrf())
                                         .content("""
-                                                            {
-                                                                "customerId": "%s",
-                                                                "productId":  "%s",
-                                                                "quantity":    %d
-                                                            }
-                                                        """.formatted(
-                                                        customerId,
-                                                        productId,
-                                                        quantity
-                                                )
+                                                {
+                                                    "customerId": "%s",
+                                                    "productId":  "%s",
+                                                    "quantity":    %d
+                                                }
+                                                """.formatted(customerId, productId, quantity)
                                         )
                         )
 
@@ -351,16 +336,12 @@ class ShopControllerIT {
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .with(csrf())
                                         .content("""
-                                                            {
-                                                                "customerId": "%s",
-                                                                "productId":  "%s",
-                                                                "quantity":    %d
-                                                            }
-                                                        """.formatted(
-                                                        UUID.randomUUID(),
-                                                        UUID.randomUUID(),
-                                                        1
-                                                )
+                                                {
+                                                    "customerId": "%s",
+                                                    "productId":  "%s",
+                                                    "quantity":    %d
+                                                }
+                                                """.formatted(UUID.randomUUID(), UUID.randomUUID(), 1)
                                         )
                         )
 
@@ -386,12 +367,12 @@ class ShopControllerIT {
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .with(csrf())
                                         .content("""
-                                                            {
-                                                                "customerId": "%s",
-                                                                "productId":  "%s",
-                                                                "quantity":    %d
-                                                            }
-                                                        """.formatted(
+                                                {
+                                                    "customerId": "%s",
+                                                    "productId":  "%s",
+                                                    "quantity":    %d
+                                                }
+                                                """.formatted(
                                                         expectedDetails.getCustomer().getId(),
                                                         expectedDetails.getProduct().getId(),
                                                         expectedDetails.getQuantity()
@@ -474,11 +455,8 @@ class ShopControllerIT {
             verify(orderRepository, never()).findAll(any(Specification.class), any(Pageable.class));
         }
 
-        @ParameterizedTest
+        @Test
         @WithMockUser(roles = {AppConstants.ROLE_NAME_ADMIN})
-        @CsvSource(value = {
-                ""
-        })
         void with_csrf_token_as_authorized_user() throws Exception {
             // given
             final var mockedSpec = mock(Specification.class);
@@ -492,7 +470,13 @@ class ShopControllerIT {
                             post(BASE_PATH)
                                     .with(csrf())
                                     .contentType(MediaType.APPLICATION_JSON)
-                                    .content("{}")
+                                    .content("""
+                                            {
+                                                "customerMail": "max.mustermann@web.de",
+                                                "orderState": "NEW"
+                                            }
+                                            """
+                                    )
                     )
 
                     // then
