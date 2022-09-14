@@ -9,6 +9,8 @@ import de.cronos.demo.mapping.orders.OrderRepository;
 import de.cronos.demo.mapping.orders.model.OrderEntity;
 import de.cronos.demo.mapping.orders.model.OrderMapper;
 import de.cronos.demo.mapping.orders.model.events.PlaceOrderEvent;
+import de.cronos.demo.mapping.orders.model.events.QueryOrderEvent;
+import de.cronos.demo.mapping.orders.model.read.OrderInfo;
 import de.cronos.demo.mapping.products.ProductRepository;
 import de.cronos.demo.mapping.products.model.ProductMapper;
 import org.junit.jupiter.api.DisplayName;
@@ -26,10 +28,12 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -408,8 +412,97 @@ class ShopControllerIT {
                 verify(orderRepository, times(1)).save(any(OrderEntity.class));
             }
 
-
         }
+
+    }
+
+    @Nested
+    @DisplayName(OrderQuery.BASE_PATH)
+    class OrderQuery {
+        protected static final String BASE_PATH = "/b2c/orderQuery";
+
+        @Test
+        @WithAnonymousUser
+        void with_csrf_token_as_anonymous_user() throws Exception {
+            // given
+
+            // when
+            mvc.perform(
+                            post(BASE_PATH)
+                                    .with(csrf())
+                                    .contentType(MediaType.APPLICATION_JSON)
+                                    .content("{}")
+                    )
+
+                    // then
+                    .andExpect(status().isUnauthorized());
+            verify(orderRepository, never()).findAll(any(Specification.class), any(Pageable.class));
+        }
+
+        @Test
+        @WithMockUser(roles = {AppConstants.ROLE_NAME_USER})
+        void with_csrf_token_as_unauthorized_user() throws Exception {
+            // given
+
+            // when
+            mvc.perform(
+                            post(BASE_PATH)
+                                    .with(csrf())
+                                    .contentType(MediaType.APPLICATION_JSON)
+                                    .content("{}")
+                    )
+
+                    // then
+                    .andExpect(status().isForbidden());
+            verify(orderRepository, never()).findAll(any(Specification.class), any(Pageable.class));
+        }
+
+        @Test
+        @WithMockUser(roles = {AppConstants.ROLE_NAME_ADMIN})
+        void without_csrf_token_as_authorized_user() throws Exception {
+            // given
+
+            // when
+            mvc.perform(
+                            post(BASE_PATH)
+                                    .contentType(MediaType.APPLICATION_JSON)
+                                    .content("{}")
+                    )
+
+                    // then
+                    .andExpect(status().isForbidden());
+            verify(orderRepository, never()).findAll(any(Specification.class), any(Pageable.class));
+        }
+
+        @ParameterizedTest
+        @WithMockUser(roles = {AppConstants.ROLE_NAME_ADMIN})
+        @CsvSource(value = {
+                ""
+        })
+        void with_csrf_token_as_authorized_user() throws Exception {
+            // given
+            final var mockedSpec = mock(Specification.class);
+            given(orderRepository.buildSpec(any(QueryOrderEvent.class))).willReturn(mockedSpec);
+            final var mockedPage = mock(Page.class);
+            given(orderRepository.findAll(any(Specification.class), any(Pageable.class))).willReturn(mockedPage);
+            given(orderMapper.toInfo(any(OrderEntity.class))).willReturn(OrderInfo.builder().build());
+
+            // when
+            mvc.perform(
+                            post(BASE_PATH)
+                                    .with(csrf())
+                                    .contentType(MediaType.APPLICATION_JSON)
+                                    .content("{}")
+                    )
+
+                    // then
+                    .andExpect(status().isOk());
+
+            verify(orderRepository, times(+1)).findAll(
+                    any(Specification.class), any(Pageable.class)
+            );
+        }
+
     }
 
 }

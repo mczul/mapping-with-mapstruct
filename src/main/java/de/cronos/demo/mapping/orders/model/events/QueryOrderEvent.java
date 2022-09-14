@@ -1,4 +1,4 @@
-package de.cronos.demo.mapping.orders.model.read;
+package de.cronos.demo.mapping.orders.model.events;
 
 import de.cronos.demo.mapping.orders.model.OrderState;
 import lombok.Builder;
@@ -9,7 +9,7 @@ import java.util.Optional;
 
 @Value
 @Builder
-public class OrderQuery {
+public class QueryOrderEvent {
 
     @NotNull
     Optional<String> customerMail;

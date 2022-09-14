@@ -1,7 +1,7 @@
 package de.cronos.demo.mapping.orders;
 
 import de.cronos.demo.mapping.orders.model.OrderState;
-import de.cronos.demo.mapping.orders.model.read.OrderQuery;
+import de.cronos.demo.mapping.orders.model.events.QueryOrderEvent;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DisplayNameGenerator.ReplaceUnderscores;
@@ -40,7 +40,7 @@ class OrderRepositoryIT {
         @Sql("classpath:db/simple.sql")
         void find_all_by_given_query_spec(OrderState state, String customerMail) {
             // given
-            final var query = OrderQuery.builder()
+            final var query = QueryOrderEvent.builder()
                     .orderState(Optional.ofNullable(state))
                     .customerMail(Optional.ofNullable(customerMail))
                     .build();
