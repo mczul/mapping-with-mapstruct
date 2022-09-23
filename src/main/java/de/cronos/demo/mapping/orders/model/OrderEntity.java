@@ -29,6 +29,10 @@ public class OrderEntity {
     @Column(name = "id")
     protected UUID id;
 
+    @Version
+    @Column(name = "version")
+    protected Short version;
+
     @NotNull
     @ManyToOne
     @JoinColumn(name = "customer_id")

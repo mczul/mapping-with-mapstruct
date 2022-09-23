@@ -74,6 +74,7 @@ public class ShopController {
      */
 
     @GetMapping("/customers")
+    @Transactional(readOnly = true)
     public Page<CustomerInfo> getAllCustomers(Pageable pageable) {
         return customerRepository.findAll(pageable)
                 .map(customerMapper::toInfo);
@@ -120,6 +121,7 @@ public class ShopController {
     }
 
     @GetMapping("/customers/{customerId}")
+    @Transactional(readOnly = true)
     public ResponseEntity<CustomerDetails> getCustomerDetails(@PathVariable UUID customerId) {
         return customerRepository.findById(customerId)
                 .map(customerMapper::toDetails)
@@ -134,12 +136,14 @@ public class ShopController {
      */
 
     @GetMapping("/products")
+    @Transactional(readOnly = true)
     public Page<ProductInfo> getAllProducts(Pageable pageable) {
         return productRepository.findAll(pageable)
                 .map(productMapper::toInfo);
     }
 
     @GetMapping("/products/{productId}")
+    @Transactional(readOnly = true)
     public ResponseEntity<ProductDetails> getProductDetails(@PathVariable UUID productId) {
         return productRepository.findById(productId)
                 .map(productMapper::toDetails)
@@ -154,12 +158,14 @@ public class ShopController {
      */
 
     @GetMapping("/orders")
+    @Transactional(readOnly = true)
     public Page<OrderInfo> getAllOrders(Pageable pageable) {
         return orderRepository.findAll(pageable)
                 .map(orderMapper::toInfo);
     }
 
     @PostMapping("/orderQuery")
+    @Transactional(readOnly = true)
     public Page<OrderInfo> executeOrderQuery(Pageable pageable, @RequestBody @Valid QueryOrderEvent queryOrderEvent) {
         final var spec = orderRepository.buildSpec(queryOrderEvent);
         return orderRepository.findAll(spec, pageable)
@@ -189,11 +195,13 @@ public class ShopController {
         // This version uses MapStruct... the OrderMapper provides overloaded "from" functions that have
         // descriptive mappings and prevent inconsistencies (see annotation process configuration in "pom.xml"...
         // "mapstruct.unmappedTargetPolicy=ERROR")
-//        return Optional.ofNullable(orderMapper.from(event))
-//                .map(orderRepository::save)
-//                .map(orderMapper::toDetails)
-//                .map(ResponseEntity::ok)
-//                .orElse(ResponseEntity.badRequest().build());
+        /*
+        return Optional.ofNullable(orderMapper.from(event))
+                .map(orderRepository::save)
+                .map(orderMapper::toDetails)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.badRequest().build());
+        */
 
         // This version looks like the solution above but uses a nice lib called "vavr" to solve an important downside
         // of the Java Stream API: By default there is no "error channel" concept other frameworks provide (e.g. RxJS).
@@ -219,6 +227,7 @@ public class ShopController {
     }
 
     @GetMapping("/orders/{orderId}")
+    @Transactional(readOnly = true)
     public ResponseEntity<OrderDetails> getOrderDetails(@PathVariable UUID orderId) {
         return orderRepository.findById(orderId)
                 .map(orderMapper::toDetails)

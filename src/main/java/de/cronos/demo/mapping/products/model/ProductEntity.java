@@ -26,6 +26,10 @@ public class ProductEntity {
     @Column(name = "id")
     protected UUID id;
 
+    @Version
+    @Column(name = "version")
+    protected Short version;
+
     @NotBlank
     @Column(name = "name")
     protected String name;

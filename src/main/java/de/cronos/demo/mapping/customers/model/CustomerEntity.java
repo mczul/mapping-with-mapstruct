@@ -33,6 +33,10 @@ public class CustomerEntity {
     @Column(name = "id")
     protected UUID id;
 
+    @Version
+    @Column(name = "version")
+    protected Short version;
+
     @NotBlank
     @Email
     @Column(name = "email")

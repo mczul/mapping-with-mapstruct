@@ -6,7 +6,10 @@
 
     <changeSet id="2022-09-05_setup-db-objects" author="c.zuleger@cronos.de">
         <createTable tableName="customers">
-            <column name="id" type="uuid" defaultValue="random_uuid()">
+            <column name="id" type="uuid">
+                <constraints nullable="false"/>
+            </column>
+            <column name="version" type="smallint" defaultValue="1">
                 <constraints nullable="false"/>
             </column>
             <column name="email" type="varchar(255)">
@@ -34,9 +37,11 @@
                              tableName="customers"
                              columnNames="email"/>
 
-
         <createTable tableName="products">
-            <column name="id" type="uuid" defaultValue="random_uuid()">
+            <column name="id" type="uuid">
+                <constraints nullable="false"/>
+            </column>
+            <column name="version" type="smallint" defaultValue="1">
                 <constraints nullable="false"/>
             </column>
             <column name="name" type="varchar(255)">
@@ -58,7 +63,10 @@
                              columnNames="name"/>
 
         <createTable tableName="customer_orders">
-            <column name="id" type="uuid" defaultValue="random_uuid()">
+            <column name="id" type="uuid">
+                <constraints nullable="false"/>
+            </column>
+            <column name="version" type="smallint" defaultValue="1">
                 <constraints nullable="false"/>
             </column>
             <column name="customer_id" type="uuid">
@@ -94,7 +102,18 @@
                                  baseColumnNames="product_id"
                                  referencedTableName="products"
                                  referencedColumnNames="id"/>
+    </changeSet>
 
+    <changeSet id="2022-09-05_setup-db-objects-h2" dbms="h2" author="c.zuleger@cronos.de">
+        <addDefaultValue tableName="customers" columnName="id" defaultValueComputed="random_uuid()"/>
+        <addDefaultValue tableName="products" columnName="id" defaultValueComputed="random_uuid()"/>
+        <addDefaultValue tableName="customer_orders" columnName="id" defaultValueComputed="random_uuid()"/>
+    </changeSet>
+
+    <changeSet id="2022-09-05_setup-db-objects-pg" dbms="postgresql" author="c.zuleger@cronos.de">
+        <addDefaultValue tableName="customers" columnName="id" defaultValueComputed="gen_random_uuid()"/>
+        <addDefaultValue tableName="products" columnName="id" defaultValueComputed="gen_random_uuid()"/>
+        <addDefaultValue tableName="customer_orders" columnName="id" defaultValueComputed="gen_random_uuid()"/>
     </changeSet>
 
     <changeSet id="2022-09-05_initial-db-data" author="c.zuleger@cronos.de">

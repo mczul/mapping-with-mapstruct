@@ -64,6 +64,7 @@ public abstract class OrderMapper {
     */
 
     @Mapping(target = "id", ignore = true)
+    @Mapping(target = "version", ignore = true)
     @Mapping(target = "state", constant = "NEW")
     @Mapping(target = "created", ignore = true)
     @Mapping(target = "lastModified", ignore = true)
@@ -71,6 +72,7 @@ public abstract class OrderMapper {
 
     // Argument names are used to find target properties
     @Mapping(target = "id", ignore = true)
+    @Mapping(target = "version", ignore = true)
     @Mapping(target = "customer", source = "customerId", qualifiedBy = {IdToCustomer.class})
     @Mapping(target = "product", source = "productId", qualifiedBy = {IdToProduct.class})
     @Mapping(target = "state", constant = "NEW")
@@ -79,6 +81,7 @@ public abstract class OrderMapper {
     public abstract OrderEntity from(UUID customerId, UUID productId, Integer quantity);
 
     @Mapping(target = "id", ignore = true)
+    @Mapping(target = "version", ignore = true)
     // Strategy pattern!
     @Mapping(target = "customer", source = "customerId", qualifiedBy = {IdToCustomer.class})
     @Mapping(target = "product", source = "productId", qualifiedBy = {IdToProduct.class})

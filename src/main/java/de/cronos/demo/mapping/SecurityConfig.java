@@ -28,7 +28,7 @@ public class SecurityConfig {
         InMemoryUserDetailsManager manager = new InMemoryUserDetailsManager();
         manager.createUser(User.builder().username("user")
                 .password("{noop}test123")
-                .roles(AppConstants.ROLE_NAME_USER)
+                .roles(AppConstants.ROLE_NAME_B2C_CUSTOMER)
                 .build());
         manager.createUser(User.builder()
                 .username("admin")
@@ -47,8 +47,8 @@ public class SecurityConfig {
                         .regexMatchers(HttpMethod.POST, "/b2c/products/?.*").hasRole(AppConstants.ROLE_NAME_ADMIN)
                         .regexMatchers(HttpMethod.PUT, "/b2c/products/?.*").hasRole(AppConstants.ROLE_NAME_ADMIN)
                         .regexMatchers(HttpMethod.DELETE, "/b2c/products/?.*").hasRole(AppConstants.ROLE_NAME_ADMIN)
-                        .regexMatchers(HttpMethod.GET, "/b2c/orders/?.*").hasAnyRole(AppConstants.ROLE_NAME_USER, AppConstants.ROLE_NAME_ADMIN)
-                        .regexMatchers(HttpMethod.POST, "/b2c/orders/?.*").hasRole(AppConstants.ROLE_NAME_USER)
+                        .regexMatchers(HttpMethod.GET, "/b2c/orders/?.*").hasAnyRole(AppConstants.ROLE_NAME_B2C_CUSTOMER, AppConstants.ROLE_NAME_ADMIN)
+                        .regexMatchers(HttpMethod.POST, "/b2c/orders/?.*").hasRole(AppConstants.ROLE_NAME_B2C_CUSTOMER)
                         .regexMatchers(HttpMethod.POST, "/b2c/orderQuery/?.*").hasRole(AppConstants.ROLE_NAME_ADMIN)
                         .anyRequest().authenticated()
                 )

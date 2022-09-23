@@ -40,6 +40,7 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -146,7 +147,7 @@ class ShopControllerIT {
         }
 
         @Test
-        @WithMockUser(roles = AppConstants.ROLE_NAME_USER)
+        @WithMockUser(roles = AppConstants.ROLE_NAME_B2C_CUSTOMER)
         void get_as_unauthorized_user() throws Exception {
             // given
             given(customerRepository.findAll(any(Pageable.class))).willReturn(new PageImpl<>(List.of()));
@@ -162,14 +163,14 @@ class ShopControllerIT {
 
         @ParameterizedTest
         @CsvSource(delimiter = '|', value = {
-                "0 | 10 | lastName  | desc | firstName | asc",
-                "1 |  5 | firstName | asc  | lastName  | desc"
+                "0 | 10 | lastName  | DESC | firstName | ASC",
+                "1 |  5 | firstName | ASC  | lastName  | DESC"
         })
         @WithMockUser(roles = AppConstants.ROLE_NAME_ADMIN)
         void get_as_authorized_user(
                 int pageIndex, int pageSize,
-                String firstSortingAttribute, String firstSortingDirection,
-                String secondSortingAttribute, String secondSortingDirection
+                String firstSortingAttribute, Direction firstSortingDirection,
+                String secondSortingAttribute, Direction secondSortingDirection
         ) throws Exception {
             // given
             final var expectedContentType = MediaType.APPLICATION_JSON;
@@ -179,8 +180,8 @@ class ShopControllerIT {
             mvc.perform(get(BASE_PATH)
                             .queryParam(queryParamNamePageIndex, String.valueOf(pageIndex))
                             .queryParam(queryParamNamePageSize, String.valueOf(pageSize))
-                            .queryParam(queryParamNamePageSort, firstSortingAttribute + "," + firstSortingDirection)
-                            .queryParam(queryParamNamePageSort, secondSortingAttribute + "," + secondSortingDirection)
+                            .queryParam(queryParamNamePageSort, firstSortingAttribute + "," + firstSortingDirection.name().toLowerCase(Locale.ROOT))
+                            .queryParam(queryParamNamePageSort, secondSortingAttribute + "," + secondSortingDirection.name().toLowerCase(Locale.ROOT))
                             .accept(expectedContentType))
                     // then
                     .andExpect(status().isOk())
@@ -197,12 +198,12 @@ class ShopControllerIT {
             final var actualFirstOrder = Optional.ofNullable(pageableCaptor.getValue().getSort()
                     .getOrderFor(firstSortingAttribute));
             assertThat(actualFirstOrder).as("First sorting parameter not considered")
-                    .hasValue(new Sort.Order(Direction.fromString(firstSortingDirection), firstSortingAttribute));
+                    .hasValue(new Sort.Order(firstSortingDirection, firstSortingAttribute));
 
             final var actualSecondOrder = Optional.ofNullable(pageableCaptor.getValue().getSort()
                     .getOrderFor(secondSortingAttribute));
             assertThat(actualSecondOrder).as("Second sorting parameter not considered")
-                    .hasValue(new Sort.Order(Direction.fromString(secondSortingDirection), secondSortingAttribute));
+                    .hasValue(new Sort.Order(secondSortingDirection, secondSortingAttribute));
         }
 
     }
@@ -264,7 +265,7 @@ class ShopControllerIT {
             }
 
             @Test
-            @WithMockUser(roles = {AppConstants.ROLE_NAME_USER})
+            @WithMockUser(roles = {AppConstants.ROLE_NAME_B2C_CUSTOMER})
             void without_csrf_token_as_authorized_user() throws Exception {
                 // given
 
@@ -297,7 +298,7 @@ class ShopControllerIT {
                     "12345678-90ab-cdef-1234-567890ab0101, 12345678-90ab-cdef-1234-567890ab0102, 0",
 
             })
-            @WithMockUser(roles = {AppConstants.ROLE_NAME_USER})
+            @WithMockUser(roles = {AppConstants.ROLE_NAME_B2C_CUSTOMER})
             void with_csrf_token_as_authorized_user_and_with_invalid_payload(String customerId, String productId, Integer quantity) throws Exception {
                 // given
 
@@ -323,7 +324,7 @@ class ShopControllerIT {
             }
 
             @Test
-            @WithMockUser(roles = {AppConstants.ROLE_NAME_USER})
+            @WithMockUser(roles = {AppConstants.ROLE_NAME_B2C_CUSTOMER})
             void with_csrf_token_as_authorized_user_when_persistence_throws_exception() throws Exception {
                 // given
                 final var orderEntity = mock(OrderEntity.class);
@@ -350,7 +351,7 @@ class ShopControllerIT {
             }
 
             @Test
-            @WithMockUser(roles = {AppConstants.ROLE_NAME_USER})
+            @WithMockUser(roles = {AppConstants.ROLE_NAME_B2C_CUSTOMER})
             void with_csrf_token_as_authorized_user_and_with_valid_payload() throws Exception {
                 // given
                 //  -> we do not need to care about entities... the return value of the final
@@ -421,7 +422,7 @@ class ShopControllerIT {
         }
 
         @Test
-        @WithMockUser(roles = {AppConstants.ROLE_NAME_USER})
+        @WithMockUser(roles = {AppConstants.ROLE_NAME_B2C_CUSTOMER})
         void with_csrf_token_as_unauthorized_user() throws Exception {
             // given
 
