@@ -104,6 +104,74 @@
                                  referencedColumnNames="id"/>
     </changeSet>
 
+    <changeSet id="2022-09-05_setup-views-pg" dbms="postgresql" author="c.zuleger@cronos.de">
+        <sql>
+            CREATE VIEW active_customer_statistics AS
+            WITH last_order AS (SELECT DISTINCT o.id       AS order_id
+                                              , o.product_id
+                                              , o.customer_id
+                                              , o.created  AS order_created
+                                              , p.name     AS product_name
+                                              , o.quantity AS order_quantity
+                                              , o.state    AS order_state
+                                FROM customer_orders o
+                                         INNER JOIN products p ON o.product_id = p.id
+                                WHERE o.created >= current_timestamp - INTERVAL '30 days'
+                                  AND NOT EXISTS(
+                                        SELECT 'x'
+                                        FROM customer_orders t
+                                        WHERE t.customer_id = o.customer_id
+                                          AND t.created > o.created
+                                    ))
+            SELECT DISTINCT c.id
+                          , c.email
+                          , c.first_name
+                          , c.last_name
+                          , c.birthday
+                          , lo.order_created  last_order_placed
+                          , lo.product_id     last_product_id_ordered
+                          , lo.product_name   last_product_name_ordered
+                          , lo.order_quantity last_quantity_ordered
+                          , lo.order_state    last_order_state
+            FROM customers c
+                     INNER JOIN last_order lo ON c.id = lo.customer_id
+        </sql>
+    </changeSet>
+
+    <changeSet id="2022-09-05_setup-views-h2" dbms="h2" author="c.zuleger@cronos.de">
+        <sql>
+            CREATE VIEW active_customer_statistics AS
+            WITH last_order AS (SELECT DISTINCT o.id       AS order_id
+                                              , o.product_id
+                                              , o.customer_id
+                                              , o.created  AS order_created
+                                              , p.name     AS product_name
+                                              , o.quantity AS order_quantity
+                                              , o.state    AS order_state
+                                FROM customer_orders o
+                                         INNER JOIN products p ON o.product_id = p.id
+                                WHERE o.created >= current_timestamp - 30
+                                  AND NOT EXISTS(
+                                        SELECT 'x'
+                                        FROM customer_orders t
+                                        WHERE t.customer_id = o.customer_id
+                                          AND t.created > o.created
+                                    ))
+            SELECT DISTINCT c.id
+                          , c.email
+                          , c.first_name
+                          , c.last_name
+                          , c.birthday
+                          , lo.order_created  last_order_placed
+                          , lo.product_id     last_product_id_ordered
+                          , lo.product_name   last_product_name_ordered
+                          , lo.order_quantity last_quantity_ordered
+                          , lo.order_state    last_order_state
+            FROM customers c
+                     INNER JOIN last_order lo ON c.id = lo.customer_id
+        </sql>
+    </changeSet>
+
     <changeSet id="2022-09-05_setup-db-objects-h2" dbms="h2" author="c.zuleger@cronos.de">
         <addDefaultValue tableName="customers" columnName="id" defaultValueComputed="random_uuid()"/>
         <addDefaultValue tableName="products" columnName="id" defaultValueComputed="random_uuid()"/>
