@@ -1,0 +1,17 @@
+services:
+  backend:
+    build: ./
+    environment:
+      SPRING_DATASOURCE_USERNAME: demo
+      SPRING_DATASOURCE_PASSWORD: topsecret4Ever!
+      SPRING_DATASOURCE_URL: jdbc:postgresql://database:5432/demo
+    ports:
+      - 8080:8080
+  database:
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: demo
+      POSTGRES_PASSWORD: topsecret4Ever!
+      POSTGRES_DB: demo
+    ports:
+      - 5432:5432
