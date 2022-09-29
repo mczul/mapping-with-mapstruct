@@ -8,6 +8,8 @@ import de.cronos.demo.mapping.customers.model.events.CreateCustomerEvent;
 import de.cronos.demo.mapping.customers.model.events.UpdateCustomerEvent;
 import de.cronos.demo.mapping.customers.model.read.CustomerDetails;
 import de.cronos.demo.mapping.customers.model.read.CustomerInfo;
+import de.cronos.demo.mapping.customers.model.read.CustomerRecord;
+import de.cronos.demo.mapping.customers.model.read.CustomerStatistics;
 import de.cronos.demo.mapping.orders.OrderRepository;
 import de.cronos.demo.mapping.orders.model.OrderMapper;
 import de.cronos.demo.mapping.orders.model.OrderState;
@@ -78,6 +80,18 @@ public class ShopController {
     public Page<CustomerInfo> getAllCustomers(Pageable pageable) {
         return customerRepository.findAll(pageable)
                 .map(customerMapper::toInfo);
+    }
+
+    @GetMapping("/customerStatistics")
+    @Transactional(readOnly = true)
+    public Page<CustomerStatistics> getActiveCustomerStatistics(Pageable pageable) {
+        return customerRepository.loadActiveCustomerStatistics(pageable);
+    }
+
+    @GetMapping("/customerRecords")
+    @Transactional(readOnly = true)
+    public Page<CustomerRecord> getCustomerRecords(Pageable pageable) {
+        return customerRepository.loadCustomerRecords(pageable);
     }
 
     @PostMapping("/customers")
