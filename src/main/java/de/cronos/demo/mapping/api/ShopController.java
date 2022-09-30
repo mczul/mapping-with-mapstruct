@@ -18,9 +18,12 @@ import de.cronos.demo.mapping.orders.model.events.QueryOrderEvent;
 import de.cronos.demo.mapping.orders.model.read.OrderDetails;
 import de.cronos.demo.mapping.orders.model.read.OrderInfo;
 import de.cronos.demo.mapping.products.ProductRepository;
+import de.cronos.demo.mapping.products.ProductStatisticsRepository;
 import de.cronos.demo.mapping.products.model.ProductMapper;
 import de.cronos.demo.mapping.products.model.read.ProductDetails;
 import de.cronos.demo.mapping.products.model.read.ProductInfo;
+import de.cronos.demo.mapping.products.model.read.ProductRecord;
+import de.cronos.demo.mapping.products.model.read.ProductStatistics;
 import io.vavr.control.Try;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -49,6 +52,7 @@ public class ShopController {
     protected final CustomerRepository customerRepository;
     protected final CustomerMapper customerMapper;
     protected final ProductRepository productRepository;
+    protected final ProductStatisticsRepository productStatisticsRepository;
     protected final ProductMapper productMapper;
     protected final OrderRepository orderRepository;
     protected final OrderMapper orderMapper;
@@ -71,28 +75,50 @@ public class ShopController {
 
     /*
         ----------------------------------------------------------------------------------------------------------------
-        --- Customer ---------------------------------------------------------------------------------------------------
+        --- Customer: Read ---------------------------------------------------------------------------------------------
         ----------------------------------------------------------------------------------------------------------------
      */
 
-    @GetMapping("/customers")
+    @GetMapping("/customers/infos")
     @Transactional(readOnly = true)
-    public Page<CustomerInfo> getAllCustomers(Pageable pageable) {
+    public Page<CustomerInfo> getCustomerInfos(Pageable pageable) {
         return customerRepository.findAll(pageable)
                 .map(customerMapper::toInfo);
     }
 
-    @GetMapping("/customerStatistics")
+    @GetMapping("/customers/details")
     @Transactional(readOnly = true)
-    public Page<CustomerStatistics> getActiveCustomerStatistics(Pageable pageable) {
+    public Page<CustomerDetails> getCustomerDetails(Pageable pageable) {
+        return customerRepository.findAll(pageable)
+                .map(customerMapper::toDetails);
+    }
+
+    @GetMapping("/customers/statistics")
+    @Transactional(readOnly = true)
+    public Page<CustomerStatistics> getCustomerStatistics(Pageable pageable) {
         return customerRepository.loadActiveCustomerStatistics(pageable);
     }
 
-    @GetMapping("/customerRecords")
+    @GetMapping("/customers/records")
     @Transactional(readOnly = true)
     public Page<CustomerRecord> getCustomerRecords(Pageable pageable) {
         return customerRepository.loadCustomerRecords(pageable);
     }
+
+    @GetMapping("/customers/{customerId}")
+    @Transactional(readOnly = true)
+    public ResponseEntity<CustomerDetails> getCustomerDetailsById(@PathVariable UUID customerId) {
+        return customerRepository.findById(customerId)
+                .map(customerMapper::toDetails)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    /*
+        ----------------------------------------------------------------------------------------------------------------
+        --- Customer: Write --------------------------------------------------------------------------------------------
+        ----------------------------------------------------------------------------------------------------------------
+     */
 
     @PostMapping("/customers")
     @Transactional
@@ -134,31 +160,41 @@ public class ShopController {
                 .orElse(ResponseEntity.badRequest().build());
     }
 
-    @GetMapping("/customers/{customerId}")
-    @Transactional(readOnly = true)
-    public ResponseEntity<CustomerDetails> getCustomerDetails(@PathVariable UUID customerId) {
-        return customerRepository.findById(customerId)
-                .map(customerMapper::toDetails)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
-    }
-
     /*
         ----------------------------------------------------------------------------------------------------------------
-        --- Products ---------------------------------------------------------------------------------------------------
+        --- Products: Read ---------------------------------------------------------------------------------------------
         ----------------------------------------------------------------------------------------------------------------
      */
 
-    @GetMapping("/products")
+    @GetMapping("/products/infos")
     @Transactional(readOnly = true)
-    public Page<ProductInfo> getAllProducts(Pageable pageable) {
+    public Page<ProductInfo> getProductInfos(Pageable pageable) {
         return productRepository.findAll(pageable)
                 .map(productMapper::toInfo);
     }
 
+    @GetMapping("/products/details")
+    @Transactional(readOnly = true)
+    public Page<ProductDetails> getProductDetails(Pageable pageable) {
+        return productRepository.findAll(pageable)
+                .map(productMapper::toDetails);
+    }
+
+    @GetMapping("/products/records")
+    @Transactional(readOnly = true)
+    public Page<ProductRecord> getProductRecords(Pageable pageable) {
+        return productRepository.loadProductRecords(pageable);
+    }
+
+    @GetMapping("/products/statistics")
+    @Transactional(readOnly = true)
+    public Page<ProductStatistics> getProductStatistics(Pageable pageable) {
+        return productStatisticsRepository.findAll(pageable);
+    }
+
     @GetMapping("/products/{productId}")
     @Transactional(readOnly = true)
-    public ResponseEntity<ProductDetails> getProductDetails(@PathVariable UUID productId) {
+    public ResponseEntity<ProductDetails> getProductDetailsById(@PathVariable UUID productId) {
         return productRepository.findById(productId)
                 .map(productMapper::toDetails)
                 .map(ResponseEntity::ok)
@@ -178,7 +214,7 @@ public class ShopController {
                 .map(orderMapper::toInfo);
     }
 
-    @PostMapping("/orderQuery")
+    @PostMapping("/orders/query")
     @Transactional(readOnly = true)
     public Page<OrderInfo> executeOrderQuery(Pageable pageable, @RequestBody @Valid QueryOrderEvent queryOrderEvent) {
         final var spec = orderRepository.buildSpec(queryOrderEvent);

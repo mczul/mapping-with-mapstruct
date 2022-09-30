@@ -12,6 +12,7 @@ import de.cronos.demo.mapping.orders.model.events.PlaceOrderEvent;
 import de.cronos.demo.mapping.orders.model.events.QueryOrderEvent;
 import de.cronos.demo.mapping.orders.model.read.OrderInfo;
 import de.cronos.demo.mapping.products.ProductRepository;
+import de.cronos.demo.mapping.products.ProductStatisticsRepository;
 import de.cronos.demo.mapping.products.model.ProductMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.DisplayNameGeneration;
@@ -105,6 +106,8 @@ class ShopControllerIT {
     @MockBean
     protected ProductRepository productRepository;
     @MockBean
+    protected ProductStatisticsRepository productStatisticsRepository;
+    @MockBean
     protected ProductMapper productMapper;
     @MockBean
     protected OrderRepository orderRepository;
@@ -126,7 +129,7 @@ class ShopControllerIT {
     @Nested
     @DisplayName(Customers.BASE_PATH)
     class Customers {
-        protected static final String BASE_PATH = "/b2c/customers";
+        protected static final String BASE_PATH = "/b2c/customers/infos";
 
         @Captor
         protected ArgumentCaptor<Pageable> pageableCaptor;
@@ -401,7 +404,7 @@ class ShopControllerIT {
     @Nested
     @DisplayName(OrderQuery.BASE_PATH)
     class OrderQuery {
-        protected static final String BASE_PATH = "/b2c/orderQuery";
+        protected static final String BASE_PATH = "/b2c/orders/query";
 
         @Test
         @WithAnonymousUser
