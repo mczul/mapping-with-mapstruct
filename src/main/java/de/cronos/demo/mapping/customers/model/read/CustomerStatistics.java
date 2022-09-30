@@ -8,6 +8,8 @@ import java.time.LocalDate;
 
 public interface CustomerStatistics {
 
+    // No ID attribute due to tricky and unintended conversion aspect for this low level and lightweight projection type
+
     String getEmail();
 
     String getFirstName();
