@@ -1,7 +1,7 @@
 package de.cronos.demo.mapping.shipment;
 
 import de.cronos.demo.mapping.common.mapping.JavaUtilTimeMapper;
-import de.cronos.demo.mapping.orders.model.OrderEntity;
+import de.cronos.demo.mapping.orders.OrderEntity;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

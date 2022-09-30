@@ -1,4 +1,4 @@
-package de.cronos.demo.mapping.orders.model;
+package de.cronos.demo.mapping.orders;
 
 public enum OrderState {
 

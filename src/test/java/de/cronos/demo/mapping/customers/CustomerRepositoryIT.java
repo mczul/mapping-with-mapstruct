@@ -2,8 +2,8 @@ package de.cronos.demo.mapping.customers;
 
 import de.cronos.demo.mapping.customers.model.CustomerEntity;
 import de.cronos.demo.mapping.customers.model.read.CustomerRecord;
+import de.cronos.demo.mapping.orders.OrderEntity;
 import de.cronos.demo.mapping.orders.OrderRepository;
-import de.cronos.demo.mapping.orders.model.OrderEntity;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DisplayNameGenerator.ReplaceUnderscores;

@@ -1,6 +1,6 @@
 package de.cronos.demo.mapping.customers.model;
 
-import de.cronos.demo.mapping.orders.model.OrderEntity;
+import de.cronos.demo.mapping.orders.OrderEntity;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;

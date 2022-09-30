@@ -1,12 +1,12 @@
-package de.cronos.demo.mapping.orders.model;
+package de.cronos.demo.mapping.orders;
 
 import de.cronos.demo.mapping.common.mapping.IdLookupMapper;
 import de.cronos.demo.mapping.customers.model.CustomerEntity;
 import de.cronos.demo.mapping.customers.model.CustomerMapper;
 import de.cronos.demo.mapping.customers.model.IdToCustomer;
-import de.cronos.demo.mapping.orders.model.events.PlaceOrderEvent;
-import de.cronos.demo.mapping.orders.model.read.OrderDetails;
-import de.cronos.demo.mapping.orders.model.read.OrderInfo;
+import de.cronos.demo.mapping.orders.events.PlaceOrderEvent;
+import de.cronos.demo.mapping.orders.summary.OrderDetails;
+import de.cronos.demo.mapping.orders.summary.OrderInfo;
 import de.cronos.demo.mapping.products.IdToProduct;
 import de.cronos.demo.mapping.products.ProductEntity;
 import de.cronos.demo.mapping.products.ProductMapper;

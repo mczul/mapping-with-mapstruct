@@ -1,6 +1,6 @@
-package de.cronos.demo.mapping.orders.model.events;
+package de.cronos.demo.mapping.orders.events;
 
-import de.cronos.demo.mapping.orders.model.OrderState;
+import de.cronos.demo.mapping.orders.OrderState;
 import lombok.Builder;
 import lombok.Value;
 

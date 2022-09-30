@@ -1,7 +1,7 @@
 package de.cronos.demo.mapping.customers.model.read;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import de.cronos.demo.mapping.orders.model.OrderState;
+import de.cronos.demo.mapping.orders.OrderState;
 
 import java.time.Instant;
 import java.time.LocalDate;

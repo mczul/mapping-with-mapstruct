@@ -5,7 +5,7 @@ import de.cronos.demo.mapping.customers.model.events.CreateCustomerEvent;
 import de.cronos.demo.mapping.customers.model.read.CustomerDetails;
 import de.cronos.demo.mapping.customers.model.read.CustomerInfo;
 import de.cronos.demo.mapping.customers.model.read.CustomerRecord;
-import de.cronos.demo.mapping.orders.model.OrderMapper;
+import de.cronos.demo.mapping.orders.OrderMapper;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 

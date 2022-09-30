@@ -2,7 +2,9 @@ package de.cronos.demo.mapping.orders.model;
 
 import de.cronos.demo.mapping.customers.model.CustomerMapperTest;
 import de.cronos.demo.mapping.customers.model.read.CustomerInfo;
-import de.cronos.demo.mapping.orders.model.read.OrderDetails;
+import de.cronos.demo.mapping.orders.OrderEntity;
+import de.cronos.demo.mapping.orders.OrderState;
+import de.cronos.demo.mapping.orders.summary.OrderDetails;
 import de.cronos.demo.mapping.products.model.ProductMapperTest;
 import de.cronos.demo.mapping.products.summary.ProductInfo;
 

@@ -1,4 +1,4 @@
-package de.cronos.demo.mapping.orders.model.events;
+package de.cronos.demo.mapping.orders.events;
 
 import lombok.Builder;
 import lombok.Value;

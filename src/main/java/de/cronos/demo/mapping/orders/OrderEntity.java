@@ -1,4 +1,4 @@
-package de.cronos.demo.mapping.orders.model;
+package de.cronos.demo.mapping.orders;
 
 import de.cronos.demo.mapping.customers.model.CustomerEntity;
 import de.cronos.demo.mapping.products.ProductEntity;

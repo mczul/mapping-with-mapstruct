@@ -2,9 +2,7 @@ package de.cronos.demo.mapping.orders;
 
 import de.cronos.demo.mapping.PersistenceConfig;
 import de.cronos.demo.mapping.customers.CustomerRepository;
-import de.cronos.demo.mapping.orders.model.OrderEntity;
-import de.cronos.demo.mapping.orders.model.OrderState;
-import de.cronos.demo.mapping.orders.model.events.QueryOrderEvent;
+import de.cronos.demo.mapping.orders.events.QueryOrderEvent;
 import de.cronos.demo.mapping.products.ProductRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.DisplayNameGeneration;

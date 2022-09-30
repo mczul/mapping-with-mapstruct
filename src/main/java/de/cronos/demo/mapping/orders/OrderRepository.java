@@ -1,9 +1,7 @@
 package de.cronos.demo.mapping.orders;
 
 import de.cronos.demo.mapping.customers.model.CustomerEntity_;
-import de.cronos.demo.mapping.orders.model.OrderEntity;
-import de.cronos.demo.mapping.orders.model.OrderEntity_;
-import de.cronos.demo.mapping.orders.model.events.QueryOrderEvent;
+import de.cronos.demo.mapping.orders.events.QueryOrderEvent;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
@@ -24,8 +22,8 @@ public interface OrderRepository extends JpaRepository<OrderEntity, UUID>, JpaSp
                 FROM OrderEntity o
                 WHERE o.id = :id
                 AND o.state IN (
-                    de.cronos.demo.mapping.orders.model.OrderState.NEW,
-                    de.cronos.demo.mapping.orders.model.OrderState.ACCEPTED
+                    de.cronos.demo.mapping.orders.OrderState.NEW,
+                    de.cronos.demo.mapping.orders.OrderState.ACCEPTED
                 )
             """)
     Optional<OrderEntity> findCancelableById(UUID id);
