@@ -10,6 +10,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.UUID;
 
@@ -19,10 +20,11 @@ import java.util.UUID;
 @ToString
 @Entity
 @Immutable
-@Table(name = "products")
+@Table(name = "product_statistics")
 public class ProductStatistics {
 
     @Id
+    @Column(name = "id")
     UUID id;
 
     @Column(name = "name")
@@ -33,5 +35,14 @@ public class ProductStatistics {
 
     @Column(name = "last_modified")
     Instant lastModified;
+
+    @Column(name = "last_successful_order")
+    Instant lastSuccessfulOrder;
+
+    @Column(name = "average_order_quantity")
+    BigDecimal averageOrderQuantity;
+
+    @Column(name = "successful_orders")
+    Long successfulOrders;
 
 }

@@ -104,6 +104,18 @@
                                  referencedColumnNames="id"/>
     </changeSet>
 
+    <changeSet id="2022-09-05_setup-db-objects-pg" dbms="postgresql" author="c.zuleger@cronos.de">
+        <addDefaultValue tableName="customers" columnName="id" defaultValueComputed="gen_random_uuid()"/>
+        <addDefaultValue tableName="products" columnName="id" defaultValueComputed="gen_random_uuid()"/>
+        <addDefaultValue tableName="customer_orders" columnName="id" defaultValueComputed="gen_random_uuid()"/>
+    </changeSet>
+
+    <changeSet id="2022-09-05_setup-db-objects-h2" dbms="h2" author="c.zuleger@cronos.de">
+        <addDefaultValue tableName="customers" columnName="id" defaultValueComputed="random_uuid()"/>
+        <addDefaultValue tableName="products" columnName="id" defaultValueComputed="random_uuid()"/>
+        <addDefaultValue tableName="customer_orders" columnName="id" defaultValueComputed="random_uuid()"/>
+    </changeSet>
+
     <changeSet id="2022-09-05_setup-views-pg" dbms="postgresql" author="c.zuleger@cronos.de">
         <sql>
             CREATE VIEW active_customer_statistics AS
@@ -172,16 +184,20 @@
         </sql>
     </changeSet>
 
-    <changeSet id="2022-09-05_setup-db-objects-h2" dbms="h2" author="c.zuleger@cronos.de">
-        <addDefaultValue tableName="customers" columnName="id" defaultValueComputed="random_uuid()"/>
-        <addDefaultValue tableName="products" columnName="id" defaultValueComputed="random_uuid()"/>
-        <addDefaultValue tableName="customer_orders" columnName="id" defaultValueComputed="random_uuid()"/>
-    </changeSet>
-
-    <changeSet id="2022-09-05_setup-db-objects-pg" dbms="postgresql" author="c.zuleger@cronos.de">
-        <addDefaultValue tableName="customers" columnName="id" defaultValueComputed="gen_random_uuid()"/>
-        <addDefaultValue tableName="products" columnName="id" defaultValueComputed="gen_random_uuid()"/>
-        <addDefaultValue tableName="customer_orders" columnName="id" defaultValueComputed="gen_random_uuid()"/>
+    <changeSet id="2022-09-05_setup-views-common" author="c.zuleger@cronos.de">
+        <sql>
+            CREATE VIEW product_statistics AS
+            SELECT p.id
+                 , p.name
+                 , p.created
+                 , p.last_modified
+                 , max(o.created)            last_successful_order
+                 , round(avg(o.quantity), 2) average_order_quantity
+                 , count(o.id)               successful_orders
+            FROM products p
+                     LEFT JOIN customer_orders o ON p.id = o.product_id AND o.state = 'SUCCESS'
+            GROUP BY p.id
+        </sql>
     </changeSet>
 
     <changeSet id="2022-09-05_initial-db-data" author="c.zuleger@cronos.de">
