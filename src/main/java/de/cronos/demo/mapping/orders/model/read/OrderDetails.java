@@ -2,7 +2,7 @@ package de.cronos.demo.mapping.orders.model.read;
 
 import de.cronos.demo.mapping.customers.model.read.CustomerInfo;
 import de.cronos.demo.mapping.orders.model.OrderState;
-import de.cronos.demo.mapping.products.model.read.ProductInfo;
+import de.cronos.demo.mapping.products.summary.ProductInfo;
 import lombok.Builder;
 import lombok.Value;
 

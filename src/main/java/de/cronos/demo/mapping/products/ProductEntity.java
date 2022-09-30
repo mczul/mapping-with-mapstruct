@@ -1,4 +1,4 @@
-package de.cronos.demo.mapping.products.model;
+package de.cronos.demo.mapping.products;
 
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;

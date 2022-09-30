@@ -1,7 +1,6 @@
-package de.cronos.demo.mapping.products;
+package de.cronos.demo.mapping.products.statistics;
 
 import de.cronos.demo.mapping.common.data.ReadonlyRepository;
-import de.cronos.demo.mapping.products.model.read.ProductStatistics;
 
 import java.util.UUID;
 

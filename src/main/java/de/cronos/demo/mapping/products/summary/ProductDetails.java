@@ -1,4 +1,4 @@
-package de.cronos.demo.mapping.products.model.read;
+package de.cronos.demo.mapping.products.summary;
 
 import lombok.Builder;
 import lombok.Value;

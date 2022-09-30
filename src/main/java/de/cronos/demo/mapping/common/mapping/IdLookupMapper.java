@@ -4,8 +4,8 @@ import de.cronos.demo.mapping.customers.CustomerRepository;
 import de.cronos.demo.mapping.customers.model.CustomerEntity;
 import de.cronos.demo.mapping.customers.model.IdToCustomer;
 import de.cronos.demo.mapping.products.IdToProduct;
+import de.cronos.demo.mapping.products.ProductEntity;
 import de.cronos.demo.mapping.products.ProductRepository;
-import de.cronos.demo.mapping.products.model.ProductEntity;
 import org.mapstruct.Mapper;
 import org.springframework.beans.factory.annotation.Autowired;
 

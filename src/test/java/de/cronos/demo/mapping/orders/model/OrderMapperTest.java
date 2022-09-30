@@ -4,7 +4,7 @@ import de.cronos.demo.mapping.customers.model.CustomerMapperTest;
 import de.cronos.demo.mapping.customers.model.read.CustomerInfo;
 import de.cronos.demo.mapping.orders.model.read.OrderDetails;
 import de.cronos.demo.mapping.products.model.ProductMapperTest;
-import de.cronos.demo.mapping.products.model.read.ProductInfo;
+import de.cronos.demo.mapping.products.summary.ProductInfo;
 
 import java.time.Instant;
 import java.time.OffsetDateTime;

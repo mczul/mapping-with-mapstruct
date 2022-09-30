@@ -1,6 +1,6 @@
 package de.cronos.demo.mapping.products;
 
-import de.cronos.demo.mapping.products.model.ProductEntity;
+import de.cronos.demo.mapping.products.statistics.ProductStatisticsRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DisplayNameGenerator.ReplaceUnderscores;

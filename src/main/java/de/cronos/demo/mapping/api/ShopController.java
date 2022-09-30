@@ -17,13 +17,13 @@ import de.cronos.demo.mapping.orders.model.events.PlaceOrderEvent;
 import de.cronos.demo.mapping.orders.model.events.QueryOrderEvent;
 import de.cronos.demo.mapping.orders.model.read.OrderDetails;
 import de.cronos.demo.mapping.orders.model.read.OrderInfo;
+import de.cronos.demo.mapping.products.ProductMapper;
 import de.cronos.demo.mapping.products.ProductRepository;
-import de.cronos.demo.mapping.products.ProductStatisticsRepository;
-import de.cronos.demo.mapping.products.model.ProductMapper;
-import de.cronos.demo.mapping.products.model.read.ProductDetails;
-import de.cronos.demo.mapping.products.model.read.ProductInfo;
-import de.cronos.demo.mapping.products.model.read.ProductRecord;
-import de.cronos.demo.mapping.products.model.read.ProductStatistics;
+import de.cronos.demo.mapping.products.statistics.ProductStatistics;
+import de.cronos.demo.mapping.products.statistics.ProductStatisticsRepository;
+import de.cronos.demo.mapping.products.summary.ProductDetails;
+import de.cronos.demo.mapping.products.summary.ProductInfo;
+import de.cronos.demo.mapping.products.summary.ProductRecord;
 import io.vavr.control.Try;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -203,15 +203,22 @@ public class ShopController {
 
     /*
         ----------------------------------------------------------------------------------------------------------------
-        --- Order ------------------------------------------------------------------------------------------------------
+        --- Order: Read ------------------------------------------------------------------------------------------------
         ----------------------------------------------------------------------------------------------------------------
      */
 
-    @GetMapping("/orders")
+    @GetMapping("/orders/infos")
     @Transactional(readOnly = true)
-    public Page<OrderInfo> getAllOrders(Pageable pageable) {
+    public Page<OrderInfo> getOrderInfos(Pageable pageable) {
         return orderRepository.findAll(pageable)
                 .map(orderMapper::toInfo);
+    }
+
+    @GetMapping("/orders/details")
+    @Transactional(readOnly = true)
+    public Page<OrderDetails> getOrderDetails(Pageable pageable) {
+        return orderRepository.findAll(pageable)
+                .map(orderMapper::toDetails);
     }
 
     @PostMapping("/orders/query")
@@ -222,6 +229,11 @@ public class ShopController {
                 .map(orderMapper::toInfo);
     }
 
+    /*
+        ----------------------------------------------------------------------------------------------------------------
+        --- Order: Write -----------------------------------------------------------------------------------------------
+        ----------------------------------------------------------------------------------------------------------------
+     */
     @PostMapping("/orders")
     @Transactional
     public ResponseEntity<OrderDetails> placeOrder(@RequestBody @Valid PlaceOrderEvent event) {
@@ -278,7 +290,7 @@ public class ShopController {
 
     @GetMapping("/orders/{orderId}")
     @Transactional(readOnly = true)
-    public ResponseEntity<OrderDetails> getOrderDetails(@PathVariable UUID orderId) {
+    public ResponseEntity<OrderDetails> getOrderDetailsById(@PathVariable UUID orderId) {
         return orderRepository.findById(orderId)
                 .map(orderMapper::toDetails)
                 .map(ResponseEntity::ok)

@@ -1,7 +1,7 @@
-package de.cronos.demo.mapping.products.model;
+package de.cronos.demo.mapping.products;
 
-import de.cronos.demo.mapping.products.model.read.ProductDetails;
-import de.cronos.demo.mapping.products.model.read.ProductInfo;
+import de.cronos.demo.mapping.products.summary.ProductDetails;
+import de.cronos.demo.mapping.products.summary.ProductInfo;
 import org.mapstruct.Mapper;
 
 @Mapper
@@ -14,6 +14,12 @@ public interface ProductMapper {
     */
 
     ProductInfo toInfo(ProductEntity domain);
+
+    /*
+        ----------------------------------------------------------------------------------------------------------------
+        --- Details ----------------------------------------------------------------------------------------------------
+        ----------------------------------------------------------------------------------------------------------------
+    */
 
     ProductDetails toDetails(ProductEntity domain);
 
