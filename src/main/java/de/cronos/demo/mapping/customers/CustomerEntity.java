@@ -1,4 +1,4 @@
-package de.cronos.demo.mapping.customers.model;
+package de.cronos.demo.mapping.customers;
 
 import de.cronos.demo.mapping.orders.OrderEntity;
 import lombok.*;

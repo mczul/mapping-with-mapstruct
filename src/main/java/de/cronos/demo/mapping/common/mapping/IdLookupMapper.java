@@ -1,8 +1,8 @@
 package de.cronos.demo.mapping.common.mapping;
 
+import de.cronos.demo.mapping.customers.CustomerEntity;
 import de.cronos.demo.mapping.customers.CustomerRepository;
-import de.cronos.demo.mapping.customers.model.CustomerEntity;
-import de.cronos.demo.mapping.customers.model.IdToCustomer;
+import de.cronos.demo.mapping.customers.IdToCustomer;
 import de.cronos.demo.mapping.products.IdToProduct;
 import de.cronos.demo.mapping.products.ProductEntity;
 import de.cronos.demo.mapping.products.ProductRepository;

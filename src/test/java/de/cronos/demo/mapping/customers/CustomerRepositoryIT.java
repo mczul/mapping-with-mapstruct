@@ -1,7 +1,6 @@
 package de.cronos.demo.mapping.customers;
 
-import de.cronos.demo.mapping.customers.model.CustomerEntity;
-import de.cronos.demo.mapping.customers.model.read.CustomerRecord;
+import de.cronos.demo.mapping.customers.summary.CustomerRecord;
 import de.cronos.demo.mapping.orders.OrderEntity;
 import de.cronos.demo.mapping.orders.OrderRepository;
 import org.junit.jupiter.api.DisplayName;
@@ -64,34 +63,6 @@ class CustomerRepositoryIT {
 
         @Test
         @Sql("classpath:db/simple.sql")
-        void loadActiveCustomerStatistics_should_return_expected() {
-            // given
-            final var expected = underTest.findAll().stream()
-                    .map(CustomerEntity::getOrders)
-                    .flatMap(Collection::stream)
-                    .filter(order -> order.getCreated().isAfter(Instant.now().minus(30, ChronoUnit.DAYS)))
-                    .map(OrderEntity::getCustomer)
-                    .distinct()
-                    .toList();
-            assertThat(expected).isNotEmpty();
-
-            // when
-            final var actual = underTest.loadActiveCustomerStatistics(Pageable.unpaged());
-
-            // then
-            assertThat(actual.getContent().size()).isEqualTo(actual.getTotalElements());
-            assertThat(actual.getContent().size()).isEqualTo(expected.size());
-            assertThat(actual.getContent()).allMatch(actualEntry ->
-                    expected.stream().anyMatch(expectedEntry ->
-                            Objects.equals(actualEntry.getEmail(), expectedEntry.getEmail()) &&
-                                    Objects.equals(
-                                            actualEntry.getLastOrderPlaced(),
-                                            expectedEntry.getOrders().stream().map(OrderEntity::getCreated).max(Comparator.naturalOrder()).orElseThrow()
-                                    )));
-        }
-
-        @Test
-        @Sql("classpath:db/simple.sql")
         void loadCustomerRecords_should_return_expected() {
             // given
             final var expected = underTest.findAll().stream()
@@ -104,6 +75,34 @@ class CustomerRepositoryIT {
 
             // then
             assertThat(actual).containsExactlyElementsOf(expected);
+        }
+
+        @Test
+        @Sql("classpath:db/simple.sql")
+        void loadStatistics_should_return_expected() {
+            // given
+            final var expected = underTest.findAll().stream()
+                    .map(CustomerEntity::getOrders)
+                    .flatMap(Collection::stream)
+                    .filter(order -> order.getCreated().isAfter(Instant.now().minus(30, ChronoUnit.DAYS)))
+                    .map(OrderEntity::getCustomer)
+                    .distinct()
+                    .toList();
+            assertThat(expected).isNotEmpty();
+
+            // when
+            final var actual = underTest.loadStatistics(Pageable.unpaged());
+
+            // then
+            assertThat(actual.getContent().size()).isEqualTo(actual.getTotalElements());
+            assertThat(actual.getContent().size()).isEqualTo(expected.size());
+            assertThat(actual.getContent()).allMatch(actualEntry ->
+                    expected.stream().anyMatch(expectedEntry ->
+                            Objects.equals(actualEntry.getEmail(), expectedEntry.getEmail()) &&
+                                    Objects.equals(
+                                            actualEntry.getLastOrderPlaced(),
+                                            expectedEntry.getOrders().stream().map(OrderEntity::getCreated).max(Comparator.naturalOrder()).orElseThrow()
+                                    )));
         }
 
     }

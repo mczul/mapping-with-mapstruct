@@ -1,6 +1,6 @@
 package de.cronos.demo.mapping.orders;
 
-import de.cronos.demo.mapping.customers.model.CustomerEntity_;
+import de.cronos.demo.mapping.customers.CustomerEntity_;
 import de.cronos.demo.mapping.orders.events.QueryOrderEvent;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaRepository;

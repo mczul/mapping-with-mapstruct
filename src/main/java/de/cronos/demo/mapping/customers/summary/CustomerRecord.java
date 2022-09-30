@@ -1,4 +1,4 @@
-package de.cronos.demo.mapping.customers.model.read;
+package de.cronos.demo.mapping.customers.summary;
 
 import java.time.LocalDate;
 

@@ -1,4 +1,4 @@
-package de.cronos.demo.mapping.customers.model.read;
+package de.cronos.demo.mapping.customers.statistics;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import de.cronos.demo.mapping.orders.OrderState;

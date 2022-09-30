@@ -2,14 +2,14 @@ package de.cronos.demo.mapping.api;
 
 import de.cronos.demo.mapping.api.model.ShopStatistics;
 import de.cronos.demo.mapping.api.model.StatisticsMapper;
+import de.cronos.demo.mapping.customers.CustomerMapper;
 import de.cronos.demo.mapping.customers.CustomerRepository;
-import de.cronos.demo.mapping.customers.model.CustomerMapper;
-import de.cronos.demo.mapping.customers.model.events.CreateCustomerEvent;
-import de.cronos.demo.mapping.customers.model.events.UpdateCustomerEvent;
-import de.cronos.demo.mapping.customers.model.read.CustomerDetails;
-import de.cronos.demo.mapping.customers.model.read.CustomerInfo;
-import de.cronos.demo.mapping.customers.model.read.CustomerRecord;
-import de.cronos.demo.mapping.customers.model.read.CustomerStatistics;
+import de.cronos.demo.mapping.customers.events.CreateCustomerEvent;
+import de.cronos.demo.mapping.customers.events.UpdateCustomerEvent;
+import de.cronos.demo.mapping.customers.statistics.CustomerStatistics;
+import de.cronos.demo.mapping.customers.summary.CustomerDetails;
+import de.cronos.demo.mapping.customers.summary.CustomerInfo;
+import de.cronos.demo.mapping.customers.summary.CustomerRecord;
 import de.cronos.demo.mapping.orders.OrderMapper;
 import de.cronos.demo.mapping.orders.OrderRepository;
 import de.cronos.demo.mapping.orders.OrderState;
@@ -96,7 +96,7 @@ public class ShopController {
     @GetMapping("/customers/statistics")
     @Transactional(readOnly = true)
     public Page<CustomerStatistics> getCustomerStatistics(Pageable pageable) {
-        return customerRepository.loadActiveCustomerStatistics(pageable);
+        return customerRepository.loadStatistics(pageable);
     }
 
     @GetMapping("/customers/records")
@@ -229,11 +229,21 @@ public class ShopController {
                 .map(orderMapper::toInfo);
     }
 
+    @GetMapping("/orders/{orderId}")
+    @Transactional(readOnly = true)
+    public ResponseEntity<OrderDetails> getOrderDetailsById(@PathVariable UUID orderId) {
+        return orderRepository.findById(orderId)
+                .map(orderMapper::toDetails)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
     /*
         ----------------------------------------------------------------------------------------------------------------
         --- Order: Write -----------------------------------------------------------------------------------------------
         ----------------------------------------------------------------------------------------------------------------
      */
+
     @PostMapping("/orders")
     @Transactional
     public ResponseEntity<OrderDetails> placeOrder(@RequestBody @Valid PlaceOrderEvent event) {
@@ -283,15 +293,6 @@ public class ShopController {
         return orderRepository.findCancelableById(orderId)
                 .map(order -> order.withState(OrderState.CANCELED))
                 .map(orderRepository::save)
-                .map(orderMapper::toDetails)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
-    }
-
-    @GetMapping("/orders/{orderId}")
-    @Transactional(readOnly = true)
-    public ResponseEntity<OrderDetails> getOrderDetailsById(@PathVariable UUID orderId) {
-        return orderRepository.findById(orderId)
                 .map(orderMapper::toDetails)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());

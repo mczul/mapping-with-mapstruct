@@ -1,4 +1,4 @@
-package de.cronos.demo.mapping.customers.model.events;
+package de.cronos.demo.mapping.customers.events;
 
 import lombok.Builder;
 import lombok.Value;

@@ -13,7 +13,7 @@ import org.springframework.test.context.jdbc.Sql;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
-@DisplayName("Products: JPA & Repository")
+@DisplayName("Products statistics: JPA & Repository")
 @DisplayNameGeneration(ReplaceUnderscores.class)
 class ProductStatisticsRepositoryIT {
     @Autowired
