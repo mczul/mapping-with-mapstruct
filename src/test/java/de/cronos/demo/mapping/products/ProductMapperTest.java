@@ -1,6 +1,4 @@
-package de.cronos.demo.mapping.products.model;
-
-import de.cronos.demo.mapping.products.ProductEntity;
+package de.cronos.demo.mapping.products;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;

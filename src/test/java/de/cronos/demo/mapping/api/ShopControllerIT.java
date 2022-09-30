@@ -45,7 +45,7 @@ import java.util.Locale;
 import java.util.Optional;
 import java.util.UUID;
 
-import static de.cronos.demo.mapping.orders.model.OrderMapperTest.randomDetails;
+import static de.cronos.demo.mapping.orders.OrderMapperTest.randomDetails;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;

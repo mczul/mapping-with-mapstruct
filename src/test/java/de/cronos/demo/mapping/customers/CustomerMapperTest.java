@@ -1,8 +1,6 @@
-package de.cronos.demo.mapping.customers.model;
+package de.cronos.demo.mapping.customers;
 
 import de.cronos.demo.mapping.common.mapping.JavaUtilOptionalMapper;
-import de.cronos.demo.mapping.customers.CustomerEntity;
-import de.cronos.demo.mapping.customers.CustomerMapperImpl;
 import de.cronos.demo.mapping.orders.OrderMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.DisplayNameGeneration;
