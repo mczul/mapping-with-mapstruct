@@ -34,12 +34,12 @@ public class OrderEntity {
     protected Short version;
 
     @NotNull
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY) // no positive effects of EAGER initialized references
     @JoinColumn(name = "customer_id")
     protected CustomerEntity customer;
 
     @NotNull
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY) // no positive effects of EAGER initialized references
     @JoinColumn(name = "product_id")
     protected ProductEntity product;
 
