@@ -8,10 +8,14 @@ services:
     ports:
       - 8080:8080
   database:
-    image: postgres:latest
+    build: ./infrastructure/database
     environment:
       POSTGRES_USER: demo
       POSTGRES_PASSWORD: topsecret4Ever!
       POSTGRES_DB: demo
     ports:
       - 5432:5432
+  reverse_proxy:
+    build: ./infrastructure/reverse_proxy
+    ports:
+      - 80:80
