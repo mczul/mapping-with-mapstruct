@@ -19,6 +19,12 @@ public abstract class StatisticsMapper {
     @Autowired
     protected ProductRepository productRepository;
 
+    /**
+     * Translates the source string based on Shop internal language and CEO behaviour.
+     *
+     * @param source the string containing Shop words for {@code true} and {@code false}.
+     * @return a {@code Boolean} value equivalent to source semantics
+     */
     @ShopBoolean
     public Boolean fromShopBooleanString(String source) {
         if (source == null) {
@@ -27,6 +33,12 @@ public abstract class StatisticsMapper {
         return "yeeeehaaa".equalsIgnoreCase(source);
     }
 
+    /**
+     * Translates the source string representing prehistoric symbols.
+     *
+     * @param source the string containing SAP symbols for {@code true} and {@code false}.
+     * @return a {@code Boolean} value equivalent to source semantics
+     */
     @SapBoolean
     public Boolean fromSapBooleanString(String source) {
         if (source == null) {
