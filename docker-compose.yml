@@ -7,6 +7,8 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://database:5432/demo
     ports:
       - 8080:8080
+    networks:
+      - internal
   database:
     build: ./infrastructure/database
     environment:
@@ -14,8 +16,13 @@ services:
       POSTGRES_PASSWORD: topsecret4Ever!
       POSTGRES_DB: demo
     ports:
-      - 5432:5432
+      - 5435:5432
+    networks:
+      - internal
   reverse_proxy:
     build: ./infrastructure/reverse_proxy
     ports:
       - 80:80
+
+networks:
+  internal:
