@@ -8,6 +8,7 @@ import de.cronos.demo.mapping.customers.CustomerRepository;
 import de.cronos.demo.mapping.orders.OrderEntity;
 import de.cronos.demo.mapping.orders.OrderMapper;
 import de.cronos.demo.mapping.orders.OrderRepository;
+import de.cronos.demo.mapping.orders.OrderState;
 import de.cronos.demo.mapping.orders.events.PlaceOrderEvent;
 import de.cronos.demo.mapping.orders.events.QueryOrderEvent;
 import de.cronos.demo.mapping.orders.summary.OrderInfo;
@@ -36,14 +37,14 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.MediaType;
+import org.springframework.lang.Nullable;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultActions;
 
-import java.util.List;
-import java.util.Locale;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Stream;
 
 import static de.cronos.demo.mapping.orders.OrderMapperTest.randomDetails;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -77,7 +78,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * </ul>
  */
 
-@WebMvcTest
+@WebMvcTest(controllers = {ShopController.class})
 @Import({SecurityConfig.class})
 @DisplayName("Shop: REST Controller")
 @DisplayNameGeneration(ReplaceUnderscores.class)
@@ -219,25 +220,37 @@ class ShopControllerIT {
         @Nested
         class PlaceOrder {
 
+            protected ResultActions postValid(boolean withCsrfToken) throws Exception {
+                final var quantity = new Random().nextInt(100) + 1; // nextInt() returns 0 inclusive
+                return postValid(withCsrfToken, UUID.randomUUID().toString(), UUID.randomUUID().toString(), quantity);
+            }
+
+            protected ResultActions postValid(boolean withCsrfToken, String customerId, String productId, Integer quantity) throws Exception {
+                var requestBuilder = post(BASE_PATH)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                    "customerId": "%s",
+                                    "productId":  "%s",
+                                    "quantity":    %d
+                                }
+                                """.formatted(customerId, productId, quantity)
+                        );
+
+                if (withCsrfToken) {
+                    requestBuilder = requestBuilder.with(csrf());
+                }
+
+                return mvc.perform(requestBuilder);
+            }
+
             @Test
             @WithAnonymousUser
             void with_csrf_token_as_anonymous_user() throws Exception {
                 // given
 
                 // when
-                mvc.perform(
-                                post(BASE_PATH)
-                                        .with(csrf())
-                                        .contentType(MediaType.APPLICATION_JSON)
-                                        .content("""
-                                                {
-                                                    "customerId": "%s",
-                                                    "productId":  "%s",
-                                                    "quantity":    %d
-                                                }
-                                                """.formatted(UUID.randomUUID(), UUID.randomUUID(), 1)
-                                        )
-                        )
+                postValid(true)
 
                         // then
                         .andExpect(status().isUnauthorized());
@@ -249,19 +262,7 @@ class ShopControllerIT {
                 // given
 
                 // when
-                mvc.perform(
-                                post(BASE_PATH)
-                                        .with(csrf())
-                                        .contentType(MediaType.APPLICATION_JSON)
-                                        .content("""
-                                                {
-                                                    "customerId": "%s",
-                                                    "productId":  "%s",
-                                                    "quantity":    %d
-                                                }
-                                                """.formatted(UUID.randomUUID(), UUID.randomUUID(), 1)
-                                        )
-                        )
+                postValid(true)
 
                         // then
                         .andExpect(status().isForbidden());
@@ -273,19 +274,7 @@ class ShopControllerIT {
                 // given
 
                 // when
-                mvc.perform(
-                                post(BASE_PATH)
-                                        .contentType(MediaType.APPLICATION_JSON)
-                                        .content("""
-                                                {
-                                                    "customerId": "%s",
-                                                    "productId":  "%s",
-                                                    "quantity":    %d
-                                                }
-                                                """.formatted(
-                                                UUID.randomUUID(), UUID.randomUUID(), 1)
-                                        )
-                        )
+                postValid(false)
 
                         // then
                         .andExpect(status().isForbidden());
@@ -306,19 +295,7 @@ class ShopControllerIT {
                 // given
 
                 // when
-                mvc.perform(
-                                post(BASE_PATH)
-                                        .contentType(MediaType.APPLICATION_JSON)
-                                        .with(csrf())
-                                        .content("""
-                                                {
-                                                    "customerId": "%s",
-                                                    "productId":  "%s",
-                                                    "quantity":    %d
-                                                }
-                                                """.formatted(customerId, productId, quantity)
-                                        )
-                        )
+                postValid(true, customerId, productId, quantity)
 
                         // then
                         .andExpect(status().isBadRequest());
@@ -335,19 +312,7 @@ class ShopControllerIT {
                 given(orderRepository.save(orderEntity)).willThrow(new DataIntegrityViolationException("Unique constraint violated."));
 
                 // when
-                mvc.perform(
-                                post(BASE_PATH)
-                                        .contentType(MediaType.APPLICATION_JSON)
-                                        .with(csrf())
-                                        .content("""
-                                                {
-                                                    "customerId": "%s",
-                                                    "productId":  "%s",
-                                                    "quantity":    %d
-                                                }
-                                                """.formatted(UUID.randomUUID(), UUID.randomUUID(), 1)
-                                        )
-                        )
+                postValid(true)
 
                         // then
                         .andExpect(status().isInternalServerError());
@@ -366,23 +331,10 @@ class ShopControllerIT {
                 given(orderMapper.toDetails(orderEntity)).willReturn(expectedDetails);
 
                 // when
-                mvc.perform(
-                                post(BASE_PATH)
-                                        .contentType(MediaType.APPLICATION_JSON)
-                                        .with(csrf())
-                                        .content("""
-                                                {
-                                                    "customerId": "%s",
-                                                    "productId":  "%s",
-                                                    "quantity":    %d
-                                                }
-                                                """.formatted(
-                                                        expectedDetails.getCustomer().getId(),
-                                                        expectedDetails.getProduct().getId(),
-                                                        expectedDetails.getQuantity()
-                                                )
-                                        )
-                        )
+                postValid(true,
+                        expectedDetails.getCustomer().getId().toString(),
+                        expectedDetails.getProduct().getId().toString(),
+                        expectedDetails.getQuantity())
 
                         // then
                         .andExpect(status().isOk())
@@ -399,96 +351,97 @@ class ShopControllerIT {
 
         }
 
-    }
+        @Nested
+        @DisplayName(OrderQuery.BASE_PATH)
+        class OrderQuery {
+            protected static final String BASE_PATH = Orders.BASE_PATH + "/query";
 
-    @Nested
-    @DisplayName(OrderQuery.BASE_PATH)
-    class OrderQuery {
-        protected static final String BASE_PATH = "/b2c/orders/query";
+            protected ResultActions postValid(boolean withCsrfToken) throws Exception {
+                final var random = new Random();
+                final var randomMail = random.nextBoolean() ? "random_%d@gmail.com".formatted(random.nextInt(10_000)) : null;
+                final var randomOrderState = random.nextBoolean() ? OrderState.values()[random.nextInt(OrderState.values().length - 1)] : null;
+                return postValid(withCsrfToken, randomMail, randomOrderState);
+            }
 
-        @Test
-        @WithAnonymousUser
-        void with_csrf_token_as_anonymous_user() throws Exception {
-            // given
+            protected ResultActions postValid(boolean withCsrfToken, @Nullable String customerMail, @Nullable OrderState orderState) throws Exception {
+                final String content = "{ %s }".formatted(String.join(", ",
+                        Stream.of(
+                                Optional.ofNullable(customerMail).map("\"customerMail\": \"%s\""::formatted),
+                                Optional.ofNullable(orderState).map("\"orderState\": \"%s\""::formatted)
+                        ).flatMap(Optional::stream).toList()
+                ));
 
-            // when
-            mvc.perform(
-                            post(BASE_PATH)
-                                    .with(csrf())
-                                    .contentType(MediaType.APPLICATION_JSON)
-                                    .content("{}")
-                    )
+                var requestBuilder = post(BASE_PATH)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(content);
 
-                    // then
-                    .andExpect(status().isUnauthorized());
-            verify(orderRepository, never()).findAll(any(Specification.class), any(Pageable.class));
-        }
+                if (withCsrfToken) {
+                    requestBuilder = requestBuilder.with(csrf());
+                }
 
-        @Test
-        @WithMockUser(roles = {AppConstants.ROLE_NAME_B2C_CUSTOMER})
-        void with_csrf_token_as_unauthorized_user() throws Exception {
-            // given
+                return mvc.perform(requestBuilder);
+            }
 
-            // when
-            mvc.perform(
-                            post(BASE_PATH)
-                                    .with(csrf())
-                                    .contentType(MediaType.APPLICATION_JSON)
-                                    .content("{}")
-                    )
+            @Test
+            @WithAnonymousUser
+            void with_csrf_token_as_anonymous_user() throws Exception {
+                // given
 
-                    // then
-                    .andExpect(status().isForbidden());
-            verify(orderRepository, never()).findAll(any(Specification.class), any(Pageable.class));
-        }
+                // when
+                postValid(true)
 
-        @Test
-        @WithMockUser(roles = {AppConstants.ROLE_NAME_ADMIN})
-        void without_csrf_token_as_authorized_user() throws Exception {
-            // given
+                        // then
+                        .andExpect(status().isUnauthorized());
+                verify(orderRepository, never()).findAll(any(Specification.class), any(Pageable.class));
+            }
 
-            // when
-            mvc.perform(
-                            post(BASE_PATH)
-                                    .contentType(MediaType.APPLICATION_JSON)
-                                    .content("{}")
-                    )
+            @Test
+            @WithMockUser(roles = {AppConstants.ROLE_NAME_B2C_CUSTOMER})
+            void with_csrf_token_as_unauthorized_user() throws Exception {
+                // given
 
-                    // then
-                    .andExpect(status().isForbidden());
-            verify(orderRepository, never()).findAll(any(Specification.class), any(Pageable.class));
-        }
+                // when
+                postValid(true)
 
-        @Test
-        @WithMockUser(roles = {AppConstants.ROLE_NAME_ADMIN})
-        void with_csrf_token_as_authorized_user() throws Exception {
-            // given
-            final var mockedSpec = mock(Specification.class);
-            given(orderRepository.buildSpec(any(QueryOrderEvent.class))).willReturn(mockedSpec);
-            final var mockedPage = mock(Page.class);
-            given(orderRepository.findAll(any(Specification.class), any(Pageable.class))).willReturn(mockedPage);
-            given(orderMapper.toInfo(any(OrderEntity.class))).willReturn(OrderInfo.builder().build());
+                        // then
+                        .andExpect(status().isForbidden());
+                verify(orderRepository, never()).findAll(any(Specification.class), any(Pageable.class));
+            }
 
-            // when
-            mvc.perform(
-                            post(BASE_PATH)
-                                    .with(csrf())
-                                    .contentType(MediaType.APPLICATION_JSON)
-                                    .content("""
-                                            {
-                                                "customerMail": "max.mustermann@web.de",
-                                                "orderState": "NEW"
-                                            }
-                                            """
-                                    )
-                    )
+            @Test
+            @WithMockUser(roles = {AppConstants.ROLE_NAME_ADMIN})
+            void without_csrf_token_as_authorized_user() throws Exception {
+                // given
 
-                    // then
-                    .andExpect(status().isOk());
+                // when
+                postValid(false)
 
-            verify(orderRepository, times(+1)).findAll(
-                    any(Specification.class), any(Pageable.class)
-            );
+                        // then
+                        .andExpect(status().isForbidden());
+                verify(orderRepository, never()).findAll(any(Specification.class), any(Pageable.class));
+            }
+
+            @Test
+            @WithMockUser(roles = {AppConstants.ROLE_NAME_ADMIN})
+            void with_csrf_token_as_authorized_user() throws Exception {
+                // given
+                final var mockedSpec = mock(Specification.class);
+                given(orderRepository.buildSpec(any(QueryOrderEvent.class))).willReturn(mockedSpec);
+                final var mockedPage = mock(Page.class);
+                given(orderRepository.findAll(any(Specification.class), any(Pageable.class))).willReturn(mockedPage);
+                given(orderMapper.toInfo(any(OrderEntity.class))).willReturn(OrderInfo.builder().build());
+
+                // when
+                postValid(true)
+
+                        // then
+                        .andExpect(status().isOk());
+
+                verify(orderRepository, times(+1)).findAll(
+                        any(Specification.class), any(Pageable.class)
+                );
+            }
+
         }
 
     }

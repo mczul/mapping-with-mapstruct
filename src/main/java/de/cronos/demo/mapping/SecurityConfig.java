@@ -41,15 +41,25 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.authorizeHttpRequests(authorize -> authorize
+                        .regexMatchers("/error").denyAll()
+                        // Global shop statistics
                         .regexMatchers(HttpMethod.GET, "/b2c/statistics/?.*").permitAll()
+
+                        // Customers
                         .regexMatchers("/b2c/customers/?.*").hasRole(AppConstants.ROLE_NAME_ADMIN)
+
+                        // Products
                         .regexMatchers(HttpMethod.GET, "/b2c/products/?.*").permitAll()
                         .regexMatchers(HttpMethod.POST, "/b2c/products/?.*").hasRole(AppConstants.ROLE_NAME_ADMIN)
                         .regexMatchers(HttpMethod.PUT, "/b2c/products/?.*").hasRole(AppConstants.ROLE_NAME_ADMIN)
                         .regexMatchers(HttpMethod.DELETE, "/b2c/products/?.*").hasRole(AppConstants.ROLE_NAME_ADMIN)
+
+                        // Orders
                         .regexMatchers(HttpMethod.POST, "/b2c/orders/query?.*").hasRole(AppConstants.ROLE_NAME_ADMIN)
                         .regexMatchers(HttpMethod.GET, "/b2c/orders/?.*").hasAnyRole(AppConstants.ROLE_NAME_B2C_CUSTOMER, AppConstants.ROLE_NAME_ADMIN)
                         .regexMatchers(HttpMethod.POST, "/b2c/orders/?.*").hasRole(AppConstants.ROLE_NAME_B2C_CUSTOMER)
+
+                        // Everything else
                         .anyRequest().authenticated()
                 )
                 .csrf().and()
