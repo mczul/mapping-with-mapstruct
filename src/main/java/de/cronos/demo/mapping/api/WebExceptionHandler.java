@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import javax.annotation.PostConstruct;
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
+import java.time.Instant;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -33,6 +34,8 @@ public class WebExceptionHandler {
     @Value
     @Builder
     static class ExceptionReport {
+
+        Instant occured = Instant.now();
 
         String message;
 
