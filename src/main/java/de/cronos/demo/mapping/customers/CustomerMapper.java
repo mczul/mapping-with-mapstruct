@@ -39,7 +39,7 @@ public interface CustomerMapper {
     */
 
     // Doesn't make sense - just to demonstrate MapStruct's ability to handle Java's Record datatype
-    @Mapping(target = "orders", expression = "java(domain.orders.size())")
+    @Mapping(target = "numberOfOrders", expression = "java(domain.orders.size())")
     CustomerRecord toRecord(CustomerEntity domain);
 
     /*
