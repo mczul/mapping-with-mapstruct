@@ -16,8 +16,9 @@ import java.util.UUID;
 // ugly, yep. See https://github.com/projectlombok/lombok/issues/557
 @NoArgsConstructor
 @AllArgsConstructor
-@Data
-@EqualsAndHashCode(of = {"id"})
+@Getter
+@Setter
+@ToString
 @Builder
 @With
 @Entity
@@ -36,11 +37,13 @@ public class OrderEntity {
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY) // no positive effects of EAGER initialized references
     @JoinColumn(name = "customer_id")
+    @ToString.Exclude
     protected CustomerEntity customer;
 
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY) // no positive effects of EAGER initialized references
     @JoinColumn(name = "product_id")
+    @ToString.Exclude
     protected ProductEntity product;
 
     @NotNull
@@ -60,5 +63,27 @@ public class OrderEntity {
     @LastModifiedDate
     @Column(name = "last_modified")
     protected Instant lastModified;
+
+    @Override
+    public boolean equals(Object o) {
+        if (id == null) {
+            return false;
+        }
+
+        if (this == o) {
+            return true;
+        }
+
+        if (!(o instanceof final OrderEntity that)) {
+            return false;
+        }
+
+        return id.equals(that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
+    }
 
 }

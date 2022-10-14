@@ -1,7 +1,5 @@
 package de.cronos.demo.mapping.products.statistics;
 
-import lombok.EqualsAndHashCode;
-import lombok.ToString;
 import lombok.Value;
 import org.hibernate.annotations.Immutable;
 
@@ -11,8 +9,6 @@ import java.time.Instant;
 import java.util.UUID;
 
 @Value
-@EqualsAndHashCode(of = {"id"})
-@ToString
 @Immutable
 @Entity
 @Table(name = "product_statistics")

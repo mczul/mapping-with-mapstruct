@@ -19,8 +19,9 @@ import java.util.UUID;
 // ugly, yep. See https://github.com/projectlombok/lombok/issues/557
 @NoArgsConstructor
 @AllArgsConstructor
-@Data
-@EqualsAndHashCode(of = {"id"})
+@Getter
+@Setter
+@ToString
 @Builder
 @With
 @Entity
@@ -69,5 +70,28 @@ public class CustomerEntity {
     @OneToMany(mappedBy = "customer")
     @ToString.Exclude
     protected List<OrderEntity> orders;
+
+    @Override
+    public boolean equals(Object o) {
+        if (id == null) {
+            return false;
+        }
+
+        if (this == o) {
+            return true;
+        }
+
+        if (!(o instanceof final CustomerEntity that)) {
+            return false;
+        }
+
+        return id.equals(that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
+    }
+
 
 }
