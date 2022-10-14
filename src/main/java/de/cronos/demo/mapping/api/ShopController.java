@@ -45,7 +45,7 @@ import static de.cronos.demo.mapping.api.model.StatisticsMapper.*;
 @RequiredArgsConstructor
 @Validated
 @RestController
-@RequestMapping("/b2c")
+@RequestMapping("b2c")
 public class ShopController {
 
     protected final StatisticsMapper statisticsMapper;
@@ -62,7 +62,8 @@ public class ShopController {
         --- Statistics -------------------------------------------------------------------------------------------------
         ----------------------------------------------------------------------------------------------------------------
      */
-    @GetMapping("/statistics")
+
+    @GetMapping("statistics")
     public ResponseEntity<ShopStatistics> getStatistics() {
         return ResponseEntity.ok(statisticsMapper.basedOn(Map.of(
                 SOURCE_FIELD_SHOP_SECURE, "true",
@@ -79,33 +80,33 @@ public class ShopController {
         ----------------------------------------------------------------------------------------------------------------
      */
 
-    @GetMapping("/customers/infos")
+    @GetMapping("customers/infos")
     @Transactional(readOnly = true)
     public Page<CustomerInfo> getCustomerInfos(Pageable pageable) {
         return customerRepository.findAll(pageable)
                 .map(customerMapper::toInfo);
     }
 
-    @GetMapping("/customers/details")
+    @GetMapping("customers/details")
     @Transactional(readOnly = true)
     public Page<CustomerDetails> getCustomerDetails(Pageable pageable) {
         return customerRepository.findAll(pageable)
                 .map(customerMapper::toDetails);
     }
 
-    @GetMapping("/customers/statistics")
+    @GetMapping("customers/statistics")
     @Transactional(readOnly = true)
     public Page<CustomerStatistics> getCustomerStatistics(Pageable pageable) {
         return customerRepository.loadStatistics(pageable);
     }
 
-    @GetMapping("/customers/records")
+    @GetMapping("customers/records")
     @Transactional(readOnly = true)
     public Page<CustomerRecord> getCustomerRecords(Pageable pageable) {
         return customerRepository.loadCustomerRecords(pageable);
     }
 
-    @GetMapping("/customers/{customerId}")
+    @GetMapping("customers/{customerId}")
     @Transactional(readOnly = true)
     public ResponseEntity<CustomerDetails> getCustomerDetailsById(@PathVariable UUID customerId) {
         return customerRepository.findById(customerId)
@@ -120,9 +121,9 @@ public class ShopController {
         ----------------------------------------------------------------------------------------------------------------
      */
 
-    @PostMapping("/customers")
+    @PostMapping("customers")
     @Transactional
-    public ResponseEntity<CustomerDetails> createCustomer(@RequestBody @Valid CreateCustomerEvent event) {
+    public ResponseEntity<CustomerDetails> createCustomer(@Valid @RequestBody CreateCustomerEvent event) {
         // Option 1: Use Matryoshka style mapping with MapStruct
         //           pros: delegation of consistency checks to declarative framework (at compile time!); error handling
         //                 will most certainly be easier (compared to fluent Streams usage due to missing error channel)
@@ -137,9 +138,9 @@ public class ShopController {
         );
     }
 
-    @PutMapping("/customers")
+    @PutMapping("customers")
     @Transactional
-    public ResponseEntity<CustomerDetails> updateCustomer(@RequestBody @Valid UpdateCustomerEvent update) {
+    public ResponseEntity<CustomerDetails> updateCustomer(@Valid @RequestBody UpdateCustomerEvent update) {
         // Option 2: Manually use functional style method chaining in combindation with lombok's "@With" feature
         //           (looks clean... but consistency might be a problem due to manual sync between event and entity)
         return customerRepository.findById(update.getCustomerId())
@@ -166,33 +167,33 @@ public class ShopController {
         ----------------------------------------------------------------------------------------------------------------
      */
 
-    @GetMapping("/products/infos")
+    @GetMapping("products/infos")
     @Transactional(readOnly = true)
     public Page<ProductInfo> getProductInfos(Pageable pageable) {
         return productRepository.findAll(pageable)
                 .map(productMapper::toInfo);
     }
 
-    @GetMapping("/products/details")
+    @GetMapping("products/details")
     @Transactional(readOnly = true)
     public Page<ProductDetails> getProductDetails(Pageable pageable) {
         return productRepository.findAll(pageable)
                 .map(productMapper::toDetails);
     }
 
-    @GetMapping("/products/records")
+    @GetMapping("products/records")
     @Transactional(readOnly = true)
     public Page<ProductRecord> getProductRecords(Pageable pageable) {
         return productRepository.loadProductRecords(pageable);
     }
 
-    @GetMapping("/products/statistics")
+    @GetMapping("products/statistics")
     @Transactional(readOnly = true)
     public Page<ProductStatistics> getProductStatistics(Pageable pageable) {
         return productStatisticsRepository.findAll(pageable);
     }
 
-    @GetMapping("/products/{productId}")
+    @GetMapping("products/{productId}")
     @Transactional(readOnly = true)
     public ResponseEntity<ProductDetails> getProductDetailsById(@PathVariable UUID productId) {
         return productRepository.findById(productId)
@@ -207,29 +208,29 @@ public class ShopController {
         ----------------------------------------------------------------------------------------------------------------
      */
 
-    @GetMapping("/orders/infos")
+    @GetMapping("orders/infos")
     @Transactional(readOnly = true)
     public Page<OrderInfo> getOrderInfos(Pageable pageable) {
         return orderRepository.findAll(pageable)
                 .map(orderMapper::toInfo);
     }
 
-    @GetMapping("/orders/details")
+    @GetMapping("orders/details")
     @Transactional(readOnly = true)
     public Page<OrderDetails> getOrderDetails(Pageable pageable) {
         return orderRepository.findAll(pageable)
                 .map(orderMapper::toDetails);
     }
 
-    @PostMapping("/orders/query")
+    @PostMapping("orders/query")
     @Transactional(readOnly = true)
-    public Page<OrderInfo> executeOrderQuery(Pageable pageable, @RequestBody @Valid QueryOrderEvent queryOrderEvent) {
+    public Page<OrderInfo> executeOrderQuery(Pageable pageable, @Valid @RequestBody QueryOrderEvent queryOrderEvent) {
         final var spec = orderRepository.buildSpec(queryOrderEvent);
         return orderRepository.findAll(spec, pageable)
                 .map(orderMapper::toInfo);
     }
 
-    @GetMapping("/orders/{orderId}")
+    @GetMapping("orders/{orderId}")
     @Transactional(readOnly = true)
     public ResponseEntity<OrderDetails> getOrderDetailsById(@PathVariable UUID orderId) {
         return orderRepository.findById(orderId)
@@ -244,9 +245,9 @@ public class ShopController {
         ----------------------------------------------------------------------------------------------------------------
      */
 
-    @PostMapping("/orders")
+    @PostMapping("orders")
     @Transactional
-    public ResponseEntity<OrderDetails> placeOrder(@RequestBody @Valid PlaceOrderEvent event) {
+    public ResponseEntity<OrderDetails> placeOrder(@Valid @RequestBody PlaceOrderEvent event) {
         // Following code is OK and does not hide implementation details... nice and transparent.
         // On the other hand: What if we add new attributes to our OrderEntity? We need to traverse all places where new
         // instances are created and update every single usage.
@@ -287,7 +288,7 @@ public class ShopController {
                 .getOrElseGet(throwable -> ResponseEntity.internalServerError().build());
     }
 
-    @DeleteMapping("/orders/{orderId}")
+    @DeleteMapping("orders/{orderId}")
     @Transactional
     public ResponseEntity<OrderDetails> cancelOrder(@PathVariable UUID orderId) {
         return orderRepository.findCancelableById(orderId)
