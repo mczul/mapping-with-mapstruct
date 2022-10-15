@@ -21,7 +21,9 @@ public interface CustomerRepository extends JpaRepository<CustomerEntity, UUID> 
     Optional<CustomerEntity> findByOrderId(UUID orderId);
 
     @Query(value = """
-                SELECT new de.cronos.demo.mapping.customers.summary.CustomerRecord(c.firstName, c.lastName, c.birthday, size(c.orders))
+                SELECT new de.cronos.demo.mapping.customers.summary.CustomerRecord(
+                    c.id, c.firstName, c.lastName, c.birthday, size(c.orders)
+                )
                 FROM CustomerEntity c
             """)
     Page<CustomerRecord> loadCustomerRecords(Pageable pageable);

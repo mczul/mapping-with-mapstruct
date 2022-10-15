@@ -66,7 +66,10 @@ class CustomerRepositoryIT {
         void loadCustomerRecords_should_return_expected() {
             // given
             final var expected = underTest.findAll().stream()
-                    .map(entity -> new CustomerRecord(entity.getFirstName(), entity.getLastName(), entity.getBirthday(), entity.orders.size()))
+                    .map(entity -> new CustomerRecord(
+                            entity.getId(), entity.getFirstName(), entity.getLastName(), entity.getBirthday(),
+                            entity.orders.size())
+                    )
                     .toList();
             assertThat(expected).isNotEmpty();
 
