@@ -11,7 +11,7 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -30,21 +30,21 @@ public interface OrderRepository extends JpaRepository<OrderEntity, UUID>, JpaSp
 
     default Specification<OrderEntity> buildSpec(QueryOrderEvent queryOrderEvent) {
         return (Root<OrderEntity> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) -> {
-            final var predicates = new LinkedList<Predicate>();
+            final var predicates = new ArrayList<Predicate>();
 
             // Order state
-            queryOrderEvent.getOrderState().ifPresent(state -> predicates.push(
+            queryOrderEvent.getOrderState().ifPresent(state -> predicates.add(
                     criteriaBuilder.equal(root.get(OrderEntity_.state), state))
             );
 
             // Customer email
-            queryOrderEvent.getCustomerMail().ifPresent(mail -> predicates.push(
+            queryOrderEvent.getCustomerMail().ifPresent(mail -> predicates.add(
                     criteriaBuilder.like(root.get(OrderEntity_.customer).get(CustomerEntity_.email), "%" + mail + "%"))
             );
 
             return predicates.stream().reduce(
                     criteriaBuilder.conjunction(),
-                    (predicate, conjunction) -> criteriaBuilder.and(conjunction, predicate)
+                    criteriaBuilder::and
             );
         };
     }
