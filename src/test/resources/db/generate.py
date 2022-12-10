@@ -26,6 +26,11 @@ class Product(NamedTuple):
     created: str
     last_modified: str
 
+class Tag(NamedTuple):
+    id: str
+    name: str
+    created: str
+    last_modified: str
 
 class Order(NamedTuple):
     id: str
@@ -39,10 +44,12 @@ class Order(NamedTuple):
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-c", "--customers", help="Number of customer records to generate", type=int, default=100)
+parser.add_argument("-t", "--tags", help="Number of product tags to generate", type=int, default=50)
 parser.add_argument("-p", "--products", help="Number of product records to generate", type=int, default=100)
 parser.add_argument("-o", "--orders", help="Number of order records to generate", type=int, default=1000)
 
 customer_ids = set()
+tag_ids = set()
 product_ids = set()
 
 
@@ -52,6 +59,13 @@ def build_customer_sql(customer: Customer):
                 ('{customer.id}', '{customer.email}', '{customer.first_name}', '{customer.last_name}', '{customer.birthday}'
                 , '{customer.created}', '{customer.last_modified}'); 
         """.strip()
+
+
+def build_tag_sql(tag: Tag):
+    return f"""
+            INSERT INTO tags(id, name, created, last_modified) VALUES 
+            ('{tag.id}', '{tag.name}', '{tag.created}', '{tag.last_modified}');
+    """.strip()
 
 
 def build_product_sql(product: Product):
@@ -92,6 +106,31 @@ def generate_orders(count: int):
                 last_modified.isoformat(),
             )
             statement = build_order_sql(order)
+            output.write(statement)
+            output.write("\n")
+        output.write("COMMIT;")
+        output.write("\n")
+
+
+def generate_tags(count: int):
+    with open(output_path, "a") as output:
+        output.write("BEGIN")
+        output.write("\n")
+        for counter in range(count):
+            id = str(uuid.uuid4())
+            name = f"Fancy tag #{counter}"
+            created = datetime.now() - timedelta(days=random.randint(0, 500))
+            last_modified = created + timedelta(days=random.randint(0, 500))
+            if last_modified > datetime.now():
+                last_modified = datetime.now()
+            tag_ids.add(id)
+            tag = Tag(
+                id,
+                name,
+                created.isoformat(),
+                last_modified.isoformat(),
+            )
+            statement = build_tag_sql(tag)
             output.write(statement)
             output.write("\n")
         output.write("COMMIT;")
@@ -155,6 +194,7 @@ def main():
     if not path.exists(path.dirname(output_path)):
         makedirs(path.dirname(output_path))
     generate_customers(args.customers)
+    generate_tags(args.tags)
     generate_products(args.products)
     generate_orders(args.orders)
 

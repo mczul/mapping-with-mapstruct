@@ -6,6 +6,9 @@ import de.cronos.demo.mapping.customers.IdToCustomer;
 import de.cronos.demo.mapping.products.IdToProduct;
 import de.cronos.demo.mapping.products.ProductEntity;
 import de.cronos.demo.mapping.products.ProductRepository;
+import de.cronos.demo.mapping.tags.IdToTag;
+import de.cronos.demo.mapping.tags.TagEntity;
+import de.cronos.demo.mapping.tags.TagRepository;
 import org.mapstruct.Mapper;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -18,6 +21,9 @@ public abstract class IdLookupMapper {
 
     @Autowired
     protected ProductRepository productRepository;
+
+    @Autowired
+    protected TagRepository tagRepository;
 
     @IdToCustomer
     public CustomerEntity toCustomer(UUID id) {
@@ -33,6 +39,14 @@ public abstract class IdLookupMapper {
             return null;
         }
         return productRepository.findById(id).orElseThrow();
+    }
+
+    @IdToTag
+    public TagEntity findTagById(UUID id) {
+        if (id == null) {
+            return null;
+        }
+        return tagRepository.findById(id).orElseThrow();
     }
 
 }

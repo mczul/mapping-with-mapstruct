@@ -1,6 +1,5 @@
-package de.cronos.demo.mapping.products;
+package de.cronos.demo.mapping.tags;
 
-import de.cronos.demo.mapping.tags.TagEntity;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -9,44 +8,32 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import java.time.Instant;
-import java.util.Set;
 import java.util.UUID;
 
-// ugly, yep. See https://github.com/projectlombok/lombok/issues/557
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
 @Setter
-@ToString(onlyExplicitlyIncluded = true)
+@ToString
 @Builder
 @With
 @Entity
-@Table(name = "products")
+@Table(name = "tags")
 @EntityListeners(AuditingEntityListener.class)
-public class ProductEntity {
+public class TagEntity {
+
     @Id
     @GeneratedValue
     @Column(name = "id")
-    @ToString.Include
     protected UUID id;
 
     @Version
     @Column(name = "version")
-    @ToString.Include
     protected Short version;
 
     @NotBlank
     @Column(name = "name")
-    @ToString.Include
     protected String name;
-
-    @OneToMany(cascade = {CascadeType.PERSIST})
-    @JoinTable(
-            name = "product_tags",
-            joinColumns = {@JoinColumn(name = "product_id")},
-            inverseJoinColumns = {@JoinColumn(name = "tag_id")}
-    )
-    protected Set<TagEntity> tags;
 
     @CreatedDate
     @Column(name = "created")
@@ -54,7 +41,6 @@ public class ProductEntity {
 
     @LastModifiedDate
     @Column(name = "last_modified")
-    @ToString.Include
     protected Instant lastModified;
 
     @Override
@@ -67,7 +53,7 @@ public class ProductEntity {
             return true;
         }
 
-        if (!(o instanceof final ProductEntity that)) {
+        if (!(o instanceof final TagEntity that)) {
             return false;
         }
 
@@ -78,4 +64,5 @@ public class ProductEntity {
     public int hashCode() {
         return getClass().hashCode();
     }
+
 }

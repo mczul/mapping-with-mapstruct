@@ -102,6 +102,51 @@
                                  baseColumnNames="product_id"
                                  referencedTableName="products"
                                  referencedColumnNames="id"/>
+
+        <createTable tableName="tags">
+            <column name="id" type="uuid">
+                <constraints nullable="false"/>
+            </column>
+            <column name="version" type="smallint" defaultValue="1">
+                <constraints nullable="false"/>
+            </column>
+            <column name="name" type="varchar(40)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_modified" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addPrimaryKey constraintName="pk_tags"
+                       tableName="tags"
+                       columnNames="id"/>
+        <addUniqueConstraint constraintName="un_tag_name" tableName="tags" columnNames="name"/>
+
+        <createTable tableName="product_tags">
+            <column name="product_id" type="uuid">
+                <constraints nullable="false"/>
+            </column>
+            <column name="tag_id" type="uuid">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addPrimaryKey tableName="product_tags" columnNames="product_id,tag_id"/>
+        <addForeignKeyConstraint constraintName="fk_product_tags_tag"
+                                 baseTableName="product_tags"
+                                 baseColumnNames="tag_id"
+                                 referencedTableName="tags"
+                                 referencedColumnNames="id"/>
+        <addForeignKeyConstraint constraintName="fk_product_tags_product"
+                                 baseTableName="product_tags"
+                                 baseColumnNames="product_id"
+                                 referencedTableName="products"
+                                 referencedColumnNames="id"/>
+
     </changeSet>
 
     <changeSet id="2022-09-05_setup-db-objects-pg" dbms="postgresql" author="c.zuleger@cronos.de">
@@ -211,6 +256,20 @@
             <column name="last_modified">2022-08-15T12:34:56Z</column>
         </insert>
 
+        <insert tableName="tags">
+            <column name="id">a12302f0-c43b-4e67-98ad-31008dd0bc84</column>
+            <column name="name">My first tag</column>
+            <column name="created">2021-06-01T08:00:00Z</column>
+            <column name="last_modified">2021-06-15T15:00:00Z</column>
+        </insert>
+
+        <insert tableName="tags">
+            <column name="id">5211492c-3c45-40a7-b33b-7777292d8830</column>
+            <column name="name">My second tag</column>
+            <column name="created">2021-06-01T08:00:00Z</column>
+            <column name="last_modified">2021-06-15T15:00:00Z</column>
+        </insert>
+
         <insert tableName="products">
             <column name="id">852c6c14-2cd9-44c1-a20a-84d7dcdfc506</column>
             <column name="name">Tomato</column>
@@ -218,11 +277,25 @@
             <column name="last_modified">2021-06-15T15:00:00Z</column>
         </insert>
 
+        <insert tableName="product_tags">
+            <column name="product_id">852c6c14-2cd9-44c1-a20a-84d7dcdfc506</column>
+            <column name="tag_id">a12302f0-c43b-4e67-98ad-31008dd0bc84</column>
+        </insert>
+        <insert tableName="product_tags">
+            <column name="product_id">852c6c14-2cd9-44c1-a20a-84d7dcdfc506</column>
+            <column name="tag_id">5211492c-3c45-40a7-b33b-7777292d8830</column>
+        </insert>
+
         <insert tableName="products">
             <column name="id">98217ee2-543c-463e-8f36-b753a62d144f</column>
             <column name="name">Olive</column>
             <column name="created">2020-02-01T09:00:00Z</column>
             <column name="last_modified">2021-10-31T18:25:00Z</column>
+        </insert>
+
+        <insert tableName="product_tags">
+            <column name="product_id">98217ee2-543c-463e-8f36-b753a62d144f</column>
+            <column name="tag_id">a12302f0-c43b-4e67-98ad-31008dd0bc84</column>
         </insert>
 
         <insert tableName="customer_orders">
